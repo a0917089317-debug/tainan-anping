@@ -2,15 +2,29 @@
 
 import { useSyncExternalStore } from "react";
 
-// Intentionally not persisted to localStorage/sessionStorage: the welcome
-// modal should ask for a name again on every fresh visit (full page load),
-// not just once per browser. It only "sticks" for as long as the current
-// page stays loaded (e.g. across client-side navigation between routes).
+// The name is persisted to localStorage so the same browser isn't asked
+// again on the next visit. "Skipped" is not persisted: a visitor who skipped
+// is asked again on the next full page load.
+const STORAGE_KEY = "visitor-name";
+
 type Listener = () => void;
 const listeners = new Set<Listener>();
 
 let currentName: string | null = null;
 let currentSkipped = false;
+let loaded = false;
+
+function getName() {
+  if (!loaded) {
+    loaded = true;
+    try {
+      currentName = localStorage.getItem(STORAGE_KEY);
+    } catch {
+      // Storage unavailable (e.g. blocked site data); keep it in memory only.
+    }
+  }
+  return currentName;
+}
 
 function notify() {
   listeners.forEach((listener) => listener());
@@ -28,7 +42,7 @@ function noopSubscribe() {
 export function useVisitorName() {
   const name = useSyncExternalStore(
     subscribe,
-    () => currentName,
+    getName,
     () => null,
   );
   const skipped = useSyncExternalStore(
@@ -44,6 +58,11 @@ export function useVisitorName() {
 
   const saveName = (value: string) => {
     currentName = value;
+    try {
+      localStorage.setItem(STORAGE_KEY, value);
+    } catch {
+      // Ignore; the name still applies for this page load.
+    }
     notify();
   };
 

@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 
-type Zone = "urban" | "north" | "coast" | "hills";
+export type Zone = "urban" | "north" | "coast" | "hills";
 
-type District = {
+export type District = {
   name: string;
   tag: string;
   zone: Zone;
@@ -50,13 +50,13 @@ const zoneStyles: Record<
 };
 
 // Outer silhouette, hand-traced from a reference district map (approximate).
-const boundaryPath =
+export const boundaryPath =
   "M 260,10 L 430,15 L 485,105 L 585,185 L 595,275 L 525,345 L 400,400 L 350,460 L 255,505 L 145,495 L 35,440 L 10,290 L 35,160 L 55,95 L 110,105 L 200,60 Z";
 
 // Each shape is a Voronoi cell (seeded near the district's real relative
 // position) clipped to the outer silhouette above — not a survey-accurate
 // boundary, but a recognisable, tileable map of all 37 districts.
-const districts: District[] = [
+export const districts: District[] = [
   { name: "白河", tag: "蓮花故鄉．關子嶺溫泉", zone: "north", path: "M 379.6,51.3 L 381.4,13.6 L 430.0,15.0 L 466.9,75.4 L 407.2,84.0 Z", labelX: 413, labelY: 47.9 },
   { name: "後壁", tag: "稻米之鄉．無米樂社區", zone: "north", path: "M 256.6,12.9 L 260.0,10.0 L 381.4,13.6 L 379.6,51.3 L 318.3,87.0 Z", labelX: 319.2, labelY: 34.9 },
   { name: "新營", tag: "台南舊縣治．糖廠文化", zone: "north", path: "M 318.3,87.0 L 379.6,51.3 L 407.2,84.0 L 397.5,132.5 L 315.3,116.1 Z", labelX: 363.6, labelY: 94.2 },
