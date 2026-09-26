@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DartControls } from "@/components/dart-controls";
 import { MapCoordPicker } from "@/components/map-coord-picker";
 import { SpotBook, type BookPage } from "@/components/spot-book";
@@ -31,8 +31,8 @@ type MapSpot = {
   // Pin centre as a percentage of the map image's width / height.
   x: number;
   y: number;
-  // Extra pixel offset, for pins that sit right next to another pin so they
-  // touch without overlapping at any map size.
+  // Extra pixel offset (at full pin size) for pins that sit right next to
+  // another pin; scaled with the pins so they touch without overlapping.
   nudge?: [number, number];
 };
 
@@ -47,9 +47,9 @@ const mapSpots: MapSpot[] = [
     mapsQuery: "安平古堡 台南市安平區國勝路82號",
     reviewsUrl:
       "https://www.google.com/search?sa=X&sca_esv=687af446f448273f&sxsrf=APpeQnsR4IJcykKy7g5k6MBmZgS4y9_dRg:1790409497621&q=%E5%AE%89%E5%B9%B3%E5%8F%A4%E5%A0%A1&si=APenkKnvnG18lUM2uw1Munh626dOA-PkzSVhvlsNbFcAluV9RTUkOh2Euu07zm3xRr4-73GUPSeKNEwxxWjJBqJA6R17RBv1bmGObHD0els6s_3g25vq8uc%3D&ved=2ahUKEwjGgYOS44uXAxUne_UHHThYCukQyNoBKAB6BAgaEAA&ictx=1&biw=1536&bih=791&dpr=1.25",
-    x: 38.8,
-    y: 7.4,
-    nudge: [8, 10],
+    x: 40.5,
+    y: 8.4,
+    nudge: [4, 8],
   },
   {
     name: "億載金城",
@@ -60,8 +60,8 @@ const mapSpots: MapSpot[] = [
     image: { src: "/images/億載金城.webp", alt: "億載金城紅磚拱門城門與護城河白色石橋" },
     mapsQuery: "億載金城 台南市安平區光州路3號",
     reviewsUrl: `https://www.google.com/search?q=${encodeURIComponent("億載金城")}`,
-    x: 38.4,
-    y: 42.1,
+    x: 38.6,
+    y: 42.8,
   },
   {
     name: "東興洋行",
@@ -72,9 +72,9 @@ const mapSpots: MapSpot[] = [
     image: { src: "/images/德商東興洋行.webp", alt: "德商東興洋行紅磚拱廊洋樓與老榕樹" },
     mapsQuery: "東興洋行 台南市安平區安北路233巷3號",
     reviewsUrl: `https://www.google.com/search?q=${encodeURIComponent("東興洋行")}`,
-    x: 38.8,
-    y: 7.4,
-    nudge: [-26, 26],
+    x: 37.8,
+    y: 8.1,
+    nudge: [-14, 6],
   },
   {
     name: "英商德記洋行",
@@ -85,9 +85,8 @@ const mapSpots: MapSpot[] = [
     image: { src: "/images/英商德記洋行.webp", alt: "英商德記洋行白色兩層拱廊洋樓" },
     mapsQuery: "英商德記洋行 台南市安平區古堡街108號",
     reviewsUrl: `https://www.google.com/search?q=${encodeURIComponent("英商德記洋行")}`,
-    x: 38.8,
-    y: 7.4,
-    nudge: [8, -27],
+    x: 39.4,
+    y: 3.6,
   },
   {
     name: "安平小砲台",
@@ -97,9 +96,9 @@ const mapSpots: MapSpot[] = [
     image: { src: "/images/安平小砲台.webp", alt: "安平小砲臺紅磚砲座與古砲" },
     mapsQuery: "安平小砲臺 台南市安平區",
     reviewsUrl: `https://www.google.com/search?q=${encodeURIComponent("安平小砲台")}`,
-    x: 38.8,
-    y: 7.4,
-    nudge: [-26, 63],
+    x: 37.2,
+    y: 13.8,
+    nudge: [-4, 8],
   },
   {
     name: "朱玖瑩故居（因鹽玖定）",
@@ -109,9 +108,9 @@ const mapSpots: MapSpot[] = [
     image: { src: "/images/朱玖瑩故居2.webp", alt: "朱玖瑩故居日式老宿舍與庭院，窗上展示書法" },
     mapsQuery: "朱玖瑩故居 因鹽玖定 台南市安平區",
     reviewsUrl: `https://www.google.com/search?q=${encodeURIComponent("朱玖瑩故居 因鹽玖定")}`,
-    x: 38.8,
-    y: 7.4,
-    nudge: [45, -27],
+    x: 39.4,
+    y: 3.6,
+    nudge: [21, 0],
   },
   {
     name: "海山館",
@@ -121,9 +120,9 @@ const mapSpots: MapSpot[] = [
     image: { src: "/images/海山館.webp", alt: "海山館閩式紅瓦老屋與紅磚庭院" },
     mapsQuery: "海山館 台南市安平區",
     reviewsUrl: `https://www.google.com/search?q=${encodeURIComponent("安平 海山館")}`,
-    x: 38.8,
-    y: 7.4,
-    nudge: [45, 10],
+    x: 44.0,
+    y: 8.9,
+    nudge: [16, -2],
   },
   {
     name: "安平老街（延平街）",
@@ -134,9 +133,9 @@ const mapSpots: MapSpot[] = [
     image: { src: "/images/安平老街.webp", alt: "安平老街人潮熙攘的街道與兩旁商店" },
     mapsQuery: "安平老街 延平街 台南市安平區",
     reviewsUrl: `https://www.google.com/search?q=${encodeURIComponent("安平老街 延平街")}`,
-    x: 38.8,
-    y: 7.4,
-    nudge: [45, 47],
+    x: 44.5,
+    y: 10.7,
+    nudge: [14, 16],
   },
   {
     name: "安平樹屋",
@@ -147,9 +146,9 @@ const mapSpots: MapSpot[] = [
     image: { src: "/images/安平樹屋.jpg", alt: "安平樹屋老榕樹盤根錯節景觀" },
     mapsQuery: "安平樹屋 台南市安平區古堡街108號",
     reviewsUrl: `https://www.google.com/search?q=${encodeURIComponent("安平樹屋")}`,
-    x: 38.8,
-    y: 7.4,
-    nudge: [23, -5],
+    x: 39.4,
+    y: 3.6,
+    nudge: [-21, 0],
   },
 ];
 
@@ -165,11 +164,29 @@ const bookPages: BookPage[] = mapSpots.map((spot) => ({
 
 type Hit = { key: string; spot: MapSpot };
 
+// Map width at which pins are full size (desktop, lg two-column layout).
+const FULL_PIN_MAP_WIDTH = 667;
+// Pins shrink with the map but stay big enough to tap.
+const MIN_PIN_SCALE = 0.65;
+
 export function AnpingSpotMap() {
   const [dartCount, setDartCount] = useState(3);
   const [hits, setHits] = useState<Hit[]>([]);
   const [throwing, setThrowing] = useState(false);
   const [page, setPage] = useState(0);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [pinScale, setPinScale] = useState(1);
+
+  useEffect(() => {
+    const el = mapRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const scale = entry.contentRect.width / FULL_PIN_MAP_WIDTH;
+      setPinScale(Math.min(1, Math.max(MIN_PIN_SCALE, scale)));
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const throwDarts = () => {
     if (throwing) return;
@@ -203,7 +220,7 @@ export function AnpingSpotMap() {
       />
 
       <div className="mt-8 grid items-start gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className="relative">
+        <div ref={mapRef} className="relative">
           <div className="relative aspect-[1187/896] overflow-hidden rounded-2xl border border-border">
             <Image
               src="/images/安平區google截圖.png"
@@ -222,7 +239,7 @@ export function AnpingSpotMap() {
               <div
                 key={spot.name}
                 className="group absolute -translate-x-1/2 -translate-y-[10px] hover:z-20 focus-within:z-20"
-                style={pinStyle(spot)}
+                style={pinStyle(spot, pinScale)}
               >
                 <a
                   href={spot.reviewsUrl}
@@ -230,6 +247,7 @@ export function AnpingSpotMap() {
                   rel="noopener noreferrer"
                   aria-label={`${spot.name}（開啟 Google 評論）`}
                   className="relative flex flex-col items-center focus:outline-none"
+                  style={{ scale: pinScale }}
                 >
                   <span className="absolute top-[3px] h-3.5 w-3.5 animate-ping rounded-full bg-accent/40" />
                   <span
@@ -280,8 +298,9 @@ export function AnpingSpotMap() {
                 style={{
                   left: `${hit.spot.x}%`,
                   top: `${hit.spot.y}%`,
-                  marginLeft: nudgeX + 10 + nth * 8,
-                  marginTop: nudgeY - 10,
+                  marginLeft: (nudgeX + 10 + nth * 8) * pinScale,
+                  marginTop: (nudgeY - 10) * pinScale,
+                  scale: pinScale,
                   animationDelay: `${i * 130}ms`,
                 }}
                 className="dart-land pointer-events-none absolute z-10 flex h-4 w-4 items-center justify-center rounded-full border-2 border-background bg-foreground text-[9px] font-bold text-background shadow-[0_2px_10px_rgba(0,0,0,0.45)]"
@@ -339,11 +358,12 @@ export function AnpingSpotMap() {
   );
 }
 
-function pinStyle(spot: MapSpot) {
+function pinStyle(spot: MapSpot, pinScale: number) {
+  const [nudgeX, nudgeY] = spot.nudge ?? [0, 0];
   return {
     left: `${spot.x}%`,
     top: `${spot.y}%`,
-    marginLeft: spot.nudge?.[0],
-    marginTop: spot.nudge?.[1],
+    marginLeft: nudgeX * pinScale,
+    marginTop: nudgeY * pinScale,
   };
 }
