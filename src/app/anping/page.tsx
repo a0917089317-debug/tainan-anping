@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Parallax } from "@/components/parallax";
 import { ParallaxHeroImage } from "@/components/parallax-hero-image";
-import { AnpingDartGame } from "@/components/anping-dart-game";
+import { AnpingSpotMap } from "@/components/anping-spot-map";
 
 export const metadata: Metadata = {
   title: "安平一日旅行散策 | 台南獨旅",
@@ -169,6 +169,20 @@ export default function AnpingPage() {
         </div>
       </section>
 
+      {/* Spot map */}
+      <section id="anping-map" className="border-t border-border px-6 py-24">
+        <div className="mx-auto max-w-6xl">
+          <SectionHeading eyebrow="安平地圖" title="景點在哪裡？地圖上看一看" />
+          <p className="mt-4 max-w-xl text-sm leading-7 text-muted">
+            選好想丟幾支飛鏢，隨機射向地圖上的景點，鏢落在哪裡，今天就順路去看看。
+            滑鼠移到標記上能看 Google 地圖與評論，右邊的景點書也可以一頁一頁翻著認識每個景點。
+          </p>
+          <div className="mt-12">
+            <AnpingSpotMap />
+          </div>
+        </div>
+      </section>
+
       {/* Landmarks */}
       <section id="anping-landmarks" className="border-t border-border px-6 py-24">
         <div className="mx-auto max-w-5xl">
@@ -312,22 +326,6 @@ export default function AnpingPage() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Dart game */}
-      <section id="anping-dart" className="border-t border-border px-6 py-24">
-        <div className="mx-auto max-w-5xl">
-          <SectionHeading
-            eyebrow="不知道去哪？"
-            title="安平地圖飛鏢，讓緣分幫你決定"
-          />
-          <p className="mt-4 max-w-xl text-sm leading-7 text-muted">
-            選好想丟幾支飛鏢，隨機射向安平地圖，鏢落在哪個景點，今天就順路去看看。
-          </p>
-          <div className="mt-4">
-            <AnpingDartGame />
           </div>
         </div>
       </section>
