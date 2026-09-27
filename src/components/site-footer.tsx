@@ -15,7 +15,7 @@ const columns = [
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border px-6 py-14">
+    <footer className="relative border-t border-accent/20 bg-gradient-to-b from-background-footer to-background px-6 py-14">
       <div className="mx-auto grid max-w-5xl gap-10 sm:grid-cols-[2fr_1fr]">
         <div>
           <span className="font-[family-name:var(--font-serif-tc)] text-lg text-accent">

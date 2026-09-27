@@ -3,6 +3,7 @@
 :root {
   --background: #0c0a08;
   --background-elevated: #14110d;
+  --background-footer: #1c150d;
   --foreground: #f1ece1;
   --muted: #a89e8d;
   --accent: #d3a45a;
@@ -13,6 +14,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-background-elevated: var(--background-elevated);
+  --color-background-footer: var(--background-footer);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
