@@ -41,7 +41,7 @@ function readTrip() {
   return tripCache;
 }
 
-function setTrip(update: (trip: string[]) => string[]) {
+export function setTrip(update: (trip: string[]) => string[]) {
   tripCache = update(readTrip());
   try {
     localStorage.setItem(TRIP_KEY, JSON.stringify(tripCache));
@@ -53,6 +53,8 @@ function subscribeTrip(listener: () => void) {
   tripListeners.add(listener);
   return () => tripListeners.delete(listener);
 }
+
+export const useTrip = () => useSyncExternalStore(subscribeTrip, readTrip, () => NO_TRIP);
 
 const btnPrimary =
   "rounded-full bg-accent px-5 py-2 text-sm font-semibold text-background transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50";
@@ -70,7 +72,7 @@ export function AnpingRoulette() {
   const [shopIdx, setShopIdx] = useState(0);
   // 最近一次「排出最短路線」省下的距離，行程變動後就不再顯示
   const [sorted, setSorted] = useState<{ key: string; savedKm: number } | null>(null);
-  const trip = useSyncExternalStore(subscribeTrip, readTrip, () => NO_TRIP);
+  const trip = useTrip();
 
   const cat = categories.find((c) => c.id === openCat);
   const landed = categories.find((c) => c.id === landedCat);

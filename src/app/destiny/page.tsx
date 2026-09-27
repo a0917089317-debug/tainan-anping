@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Parallax } from "@/components/parallax";
 import { AnpingRoulette } from "@/components/anping-roulette";
+import { DestinyJourney } from "@/components/destiny-journey";
+import { TravelDiary } from "@/components/travel-diary";
 
 export const metadata: Metadata = {
   title: "安平命運輪盤 | 台南獨旅",
@@ -97,11 +99,37 @@ export default function DestinyPage() {
               🎡 輕鬆旅行，讓命運替你選一站。
             </p>
             <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-muted">
-              轉一下，看看今天的安平會帶你去哪裡。
+              告訴輪盤你有多少時間、多少預算、今天的心情，剩下的交給命運。
             </p>
           </div>
 
-          <AnpingRoulette />
+          <DestinyJourney />
+
+          <div className="mt-24 border-t border-border pt-16">
+            <div className="mb-10 text-center">
+              <p className="mb-4 text-sm tracking-[0.3em] text-muted">FREE SPIN</p>
+              <h2 className="font-[family-name:var(--font-serif-tc)] text-3xl text-foreground">
+                想自己一層一層轉？
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-muted">
+                不設條件，從類型一路轉到店家，轉到喜歡的就加入今天行程。
+              </p>
+            </div>
+            <AnpingRoulette />
+          </div>
+
+          <div id="travel-diary" className="mt-24 scroll-mt-24 border-t border-border pt-16">
+            <div className="mb-10 text-center">
+              <p className="mb-4 text-sm tracking-[0.3em] text-muted">SOLO DIARY</p>
+              <h2 className="font-[family-name:var(--font-serif-tc)] text-3xl text-foreground">
+                💬 一個人的旅途日記
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-muted">
+                記下今天的心情，生成一張安平旅行卡，分享給也在一個人旅行的人。
+              </p>
+            </div>
+            <TravelDiary />
+          </div>
         </div>
       </section>
 
