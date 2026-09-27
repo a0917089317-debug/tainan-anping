@@ -114,6 +114,9 @@ export default function DestinyPage() {
               <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-muted">
                 不設條件，從類型一路轉到店家，轉到喜歡的就加入今天行程。
               </p>
+              <p className="mx-auto mt-6 max-w-xl rounded-xl border-2 border-amber-400 bg-amber-400/15 px-5 py-4 text-lg font-bold leading-8 text-amber-300 sm:text-xl">
+                ⚠️ 安平豆花無法搜尋確切位置，如行程中有安平豆花，無法形成 Google Map 藍線
+              </p>
             </div>
             <AnpingRoulette />
           </div>

@@ -389,10 +389,12 @@ export const mapsUrl = (name: string) =>
 export const googleUrl = (name: string) =>
   `https://www.google.com/search?q=${encodeURIComponent(`台南安平 ${name}`)}`;
 
-export const routeUrl = (names: string[]) =>
-  `https://www.google.com/maps/dir/${names
-    .map((n) => encodeURIComponent(`台南安平 ${n}`))
-    .join("/")}`;
+/** origin 為「緯度,經度」時，會當成路線的第一站 */
+export const routeUrl = (names: string[], origin?: string) =>
+  `https://www.google.com/maps/dir/${[
+    ...(origin ? [origin] : []),
+    ...names.map((n) => encodeURIComponent(`台南安平 ${n}`)),
+  ].join("/")}`;
 
 // 各地點的約略座標 [緯度, 經度]，只用來排順路的先後順序
 const coords: Record<string, [number, number]> = {

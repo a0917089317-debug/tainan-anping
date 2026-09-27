@@ -72,6 +72,34 @@ export function AnpingRoulette() {
   const [shopIdx, setShopIdx] = useState(0);
   // 最近一次「排出最短路線」省下的距離，行程變動後就不再顯示
   const [sorted, setSorted] = useState<{ key: string; savedKm: number } | null>(null);
+  // 使用者目前位置「緯度,經度」，有值時路線從這裡出發
+  const [origin, setOrigin] = useState<string | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locError, setLocError] = useState<string | null>(null);
+
+  const toggleOrigin = () => {
+    if (origin) {
+      setOrigin(null);
+      return;
+    }
+    if (!navigator.geolocation) {
+      setLocError("這個瀏覽器不支援定位");
+      return;
+    }
+    setLocating(true);
+    setLocError(null);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setOrigin(`${coords.latitude.toFixed(6)},${coords.longitude.toFixed(6)}`);
+        setLocating(false);
+      },
+      (err) => {
+        setLocError(err.code === err.PERMISSION_DENIED ? "無法取得位置，請允許瀏覽器定位權限" : "定位失敗，請稍後再試");
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
   const trip = useTrip();
 
   const cat = categories.find((c) => c.id === openCat);
@@ -372,13 +400,16 @@ export function AnpingRoulette() {
           {trip.length > 0 && (
             <div className="flex flex-wrap gap-3">
               <a
-                href={routeUrl(trip.map((id) => placeById(id).name))}
+                href={routeUrl(trip.map((id) => placeById(id).name), origin ?? undefined)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={btnPrimary}
               >
                 用 Google Maps 開路線
               </a>
+              <button type="button" onClick={toggleOrigin} disabled={locating} className={btnGhost}>
+                {locating ? "定位中…" : origin ? "✓ 從我的位置出發" : "📍 從我的位置出發"}
+              </button>
               <button
                 type="button"
                 onClick={sortTrip}
@@ -406,10 +437,28 @@ export function AnpingRoulette() {
           </p>
         )}
 
+        {locError && <p className="mt-3 text-sm text-amber-300">{locError}</p>}
+
         {trip.length === 0 ? (
           <p className="mt-4 text-muted">還沒有行程，轉到喜歡的地方就按「加入今天行程」。</p>
         ) : (
           <ol className="mt-6 grid gap-3 sm:grid-cols-2">
+            {origin && (
+              <li className="flex items-center gap-3 rounded-lg border border-accent px-3 py-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-background">
+                  起
+                </span>
+                <span className="flex-1 text-foreground">📍 我的位置</span>
+                <button
+                  type="button"
+                  onClick={() => setOrigin(null)}
+                  aria-label="取消從我的位置出發"
+                  className="text-muted hover:text-accent"
+                >
+                  ✕
+                </button>
+              </li>
+            )}
             {trip.map((id, i) => {
               const p = placeById(id);
               return (
