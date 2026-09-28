@@ -13,6 +13,7 @@ export type District = {
   labelX: number;
   labelY: number;
   href?: string;
+  hrefLabel?: string;
 };
 
 const zoneStyles: Record<
@@ -87,7 +88,7 @@ export const districts: District[] = [
   { name: "龍崎", tag: "竹編工藝．牛埔月世界", zone: "urban", path: "M 400.6,307.9 L 425.1,325.2 L 449.2,378.3 L 400.0,400.0 L 354.1,455.1 L 317.4,363.4 Z", labelX: 391.1, labelY: 371.7 },
   { name: "安平區", tag: "港邊老城．安平古堡．漁人碼頭", zone: "urban", path: "M 110.9,378.4 L 116.2,458.8 L 112.3,478.6 L 35.0,440.0 L 19.3,345.6 Z", labelX: 78.7, labelY: 420.3, href: "/destiny" },
   { name: "北區", tag: "開元寺．在地生活圈", zone: "urban", path: "M 152.6,340.1 L 170.1,342.0 L 188.9,385.7 L 172.5,407.5 L 166.7,408.3 L 140.3,355.7 Z", labelX: 165.2, labelY: 373.2 },
-  { name: "中西區", tag: "孔廟．林百貨．老城核心", zone: "urban", path: "M 110.9,378.4 L 140.3,355.7 L 166.7,408.3 L 116.3,458.7 Z", labelX: 133.5, labelY: 400.3 },
+  { name: "中西區", tag: "孔廟．林百貨．老城核心", zone: "urban", path: "M 110.9,378.4 L 140.3,355.7 L 166.7,408.3 L 116.3,458.7 Z", labelX: 133.5, labelY: 400.3, href: "/west-central", hrefLabel: "前往中西區專頁" },
   { name: "東區", tag: "成功大學．文教商圈", zone: "urban", path: "M 188.9,385.7 L 213.6,398.0 L 212.5,407.5 L 193.1,423.0 L 172.5,407.5 Z", labelX: 196.1, labelY: 404.3 },
   { name: "永康區", tag: "奇美博物館．復興夜市", zone: "urban", path: "M 195.4,334.1 L 232.0,354.1 L 240.3,370.5 L 238.9,376.3 L 213.6,398.0 L 188.9,385.7 L 170.1,342.0 Z", labelX: 211.3, labelY: 365.8 },
   { name: "關廟區", tag: "關廟麵．鳳梨產地", zone: "urban", path: "M 238.9,376.3 L 240.3,370.5 L 316.2,362.1 L 317.4,363.4 L 354.1,455.1 L 350.0,460.0 L 300.3,483.6 Z", labelX: 302.4, labelY: 410.1 },
@@ -176,7 +177,7 @@ export function TainanDistrictMap() {
                 href={selected.href}
                 className="mt-5 inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-6 py-2.5 text-sm text-accent transition-colors hover:bg-accent/20"
               >
-                前往安平專頁
+                {selected.hrefLabel ?? "前往安平專頁"}
                 <span aria-hidden>→</span>
               </Link>
             ) : (
