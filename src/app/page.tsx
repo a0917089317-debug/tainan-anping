@@ -1,37 +1,59 @@
+import Image from "next/image";
 import { Parallax } from "@/components/parallax";
 import { HeroGreeting } from "@/components/hero-greeting";
 import { TainanDistrictMap } from "@/components/tainan-district-map";
 
-const spots = [
+// places：標題裡要連到 Google 地圖的地名（以「．」分隔顯示）
+const spots: {
+  tag: string;
+  title: string;
+  desc: string;
+  images?: string[];
+  places?: string[];
+  note?: string;
+}[] = [
   {
     tag: "歷史街區",
     title: "神農街",
     desc: "台南最老的街道之一，兩側老屋掛著燈籠與招牌，白天寧靜、入夜氛圍更迷人，很適合一個人放慢腳步拍照。",
+    images: ["/images/神農街.webp"],
+    places: ["神農街"],
   },
   {
     tag: "海口夕陽",
     title: "安平老街．安平古堡",
     desc: "台灣最早的城堡遺跡，傍晚沿著運河堤岸散步看夕陽，是獨旅台南必排的行程。",
+    images: ["/images/安平老街.jpg", "/images/安平古堡.webp"],
+    places: ["安平老街", "安平古堡"],
+    note: "週三數家店家休息，去之前建議先看營業時間",
   },
   {
     tag: "百年建築",
     title: "林百貨",
     desc: "台灣第一間百貨公司，頂樓有神社遺跡與展望台，逛一層樓大約半小時，一個人也很自在。",
+    images: ["/images/林百貨.webp"],
+    places: ["林百貨"],
   },
   {
     tag: "文青選物",
     title: "正興街周邊",
     desc: "咖啡館、獨立選物店與老屋改建的小店聚集地，隨興晃進一間店就是一段小旅程。",
+    images: ["/images/正興街.png"],
+    places: ["正興街"],
   },
   {
     tag: "夜間散步",
     title: "藍晒圖文創園區",
     desc: "白天是文創商場，晚上的燈光裝置與草地氛圍很放鬆，適合吃完晚餐後散步收尾。",
+    images: ["/images/藍晒圖.png"],
+    places: ["藍晒圖文創園區"],
   },
   {
     tag: "老樹院落",
     title: "孔廟文化園區",
     desc: "全台首學，老榕樹與紅牆巷弄交錯，安靜到可以一個人坐著發呆一下午。",
+    images: ["/images/臺南孔子廟_大成坊.jpg"],
+    places: ["孔廟文化園區"],
   },
 ];
 
@@ -118,13 +140,54 @@ export default function Home() {
                   key={spot.title}
                   className="group rounded-2xl border border-border bg-background-elevated p-6 transition-colors hover:border-accent/40"
                 >
+                  {spot.images && (
+                    <div
+                      className={`mb-5 grid aspect-[4/3] gap-2 ${
+                        spot.images.length > 1 ? "grid-cols-2" : ""
+                      }`}
+                    >
+                      {spot.images.map((src, i) => (
+                        <div key={src} className="relative overflow-hidden rounded-xl">
+                          <Image
+                            src={src}
+                            alt={spot.places?.[i] ?? spot.title}
+                            fill
+                            sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw"
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <span className="text-xs tracking-wide text-accent">
                     {spot.tag}
                   </span>
                   <h3 className="mt-3 font-[family-name:var(--font-serif-tc)] text-xl">
-                    {spot.title}
+                    {spot.places
+                      ? spot.places.map((name, i) => (
+                          <span key={name}>
+                            {i > 0 && "．"}
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`台南 ${name}`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline decoration-accent/40 underline-offset-4 transition-colors hover:text-accent"
+                            >
+                              {name}
+                            </a>
+                          </span>
+                        ))
+                      : spot.title}
+                    {spot.places && (
+                      <span aria-hidden className="ml-1 text-sm text-accent">↗</span>
+                    )}
                   </h3>
                   <p className="mt-3 text-sm leading-7 text-muted">{spot.desc}</p>
+                  {spot.note && (
+                    <p className="mt-4 rounded-lg border border-accent/30 bg-accent/10 px-3 py-2 text-xs leading-6 text-accent">
+                      ⚠️ {spot.note}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
