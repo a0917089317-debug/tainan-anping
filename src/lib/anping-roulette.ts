@@ -357,6 +357,16 @@ export const places: Place[] = [
     next: "canal",
     tags: ["snack", "restaurant"],
   },
+  {
+    id: "kingfish",
+    name: "金魚京鍋燒意麵",
+    emoji: "🍲",
+    feature: "安北路上的在地人口袋名單，料多湯鮮的一大碗鍋燒意麵",
+    stay: "20～30 分鐘",
+    goodFor: ["小吃", "正餐"],
+    next: "yuu",
+    tags: ["snack"],
+  },
 ];
 
 export const dishes: Dish[] = [
@@ -368,6 +378,7 @@ export const dishes: Dish[] = [
   { id: "beef-soup", name: "牛肉湯", emoji: "🥩", shops: ["wenzhang"] },
   { id: "shrimp-cracker", name: "蝦餅", emoji: "🦐", shops: ["shrimp-cracker"] },
   { id: "candied", name: "蜜餞", emoji: "🍬", shops: ["lin"] },
+  { id: "nabeyaki", name: "鍋燒意麵", emoji: "🍲", shops: ["kingfish"] },
 ];
 
 export const placeById = (id: string) => places.find((p) => p.id === id)!;
@@ -430,6 +441,7 @@ const coords: Record<string, [number, number]> = {
   "shrimp-cracker": [23.0012, 120.1612],
   lin: [23.0013, 120.1608],
   wenzhang: [22.9975, 120.184],
+  kingfish: [22.9985, 120.158],
 };
 
 /** 兩地直線距離（公里） */
@@ -545,6 +557,7 @@ const photos: Record<string, string> = {
   deyang: "/images/德陽艦園區.jpg",
   niuyuan: "/images/牛園火鍋-1.jpg",
   qingping: "/images/慶平海產.jpg",
+  kingfish: "/images/金魚京.jpg",
 };
 
 export const photoFor = (id: string): string | undefined => photos[id];

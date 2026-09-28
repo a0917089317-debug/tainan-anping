@@ -66,6 +66,7 @@ const costs: Record<string, number> = {
   "shrimp-cracker": 100,
   lin: 150,
   wenzhang: 150,
+  kingfish: 70,
 };
 
 // 抽到時的一句話
@@ -102,6 +103,7 @@ const whispers: Record<string, string> = {
   "shrimp-cracker": "邊走邊咬蝦餅，喀滋喀滋是旅行的聲音。",
   lin: "挑幾包百年蜜餞，把安平的甜帶回家。",
   wenzhang: "一碗現切牛肉湯，暖胃也暖心。",
+  kingfish: "一大碗熱呼呼的鍋燒意麵，在地人的私房好味道。",
 };
 
 // 適合放空的地方：人少、能坐、能發呆
