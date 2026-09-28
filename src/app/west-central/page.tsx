@@ -137,13 +137,47 @@ const spots: ({
     tag: "國定古蹟",
     name: "赤崁樓",
     desc: "前身是荷蘭人興建的普羅民遮城，如今紅瓦飛簷的文昌閣與海神廟立在老榕樹下，入夜點燈後更有味道。",
-    image: "/images/赤崁樓.jpg",
+    instagram: ["https://www.instagram.com/p/Clc3eOApNqr/"],
+    sections: [
+      {
+        title: "🎫 參觀資訊",
+        items: [
+          { label: "開放時間", text: "每日 08:30 – 21:00。" },
+          {
+            label: "門票資訊",
+            text: "全票 NT$70（可臨櫃購票，亦可在 Klook 線上訂票 隨買隨用）；台南市民憑身分證免費參觀。",
+          },
+          {
+            label: "貼心叮嚀",
+            text: "中西區道路較為狹窄、車流量大，開車極難尋找路邊車位。強烈建議租借機車/Goshare，或從台南火車站搭乘 3路、5路公車 至「赤崁樓站」下車，步行最為輕鬆順暢。",
+          },
+        ],
+      },
+    ],
   },
   {
     tag: "小吃老街",
     name: "國華街",
     desc: "台南人從小吃到大的小吃街，永樂市場一帶割包、春捲、小卷米粉一攤接一攤，一個人也能一路吃過去，建議空著肚子來。",
-    instagram: ["https://www.instagram.com/p/CvACxKsBwhI/"],
+    instagram: [
+      "https://www.instagram.com/p/CvACxKsBwhI/",
+      "https://www.instagram.com/p/DNr6o965DxD/",
+      "https://www.instagram.com/p/DH2QONRJc2D/",
+    ],
+    sections: [
+      {
+        title: "🎫 景點資訊（西市場）",
+        items: [
+          {
+            label: "開放時間",
+            text: "週六、週日 11:00 – 21:00；週一、週二、週四、週五 11:00 – 20:00；週三休息。",
+          },
+          { label: "門票資訊", text: "免門票" },
+          { label: "地址", text: "臺南市中西區西門路、中正路、正興街與國華街街廓內" },
+          { label: "分類", text: "歷史古蹟、在地藝文" },
+        ],
+      },
+    ],
     nearby: {
       tag: "順路一站",
       name: "看西街長老教會",
