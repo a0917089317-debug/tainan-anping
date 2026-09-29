@@ -6,7 +6,7 @@ const columns = [
     links: [
       { href: "/#districts", label: "地區導覽" },
       { href: "/#spots", label: "景點推薦" },
-      { href: "/destiny", label: "安平命運輪盤" },
+      { href: "/destiny", label: "命運輪盤" },
       { href: "/#itinerary", label: "一日行程" },
       { href: "/#stays", label: "住宿建議" },
     ],

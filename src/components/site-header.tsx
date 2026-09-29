@@ -6,7 +6,7 @@ import { useState } from "react";
 const links = [
   { href: "/#districts", label: "地區" },
   { href: "/#spots", label: "景點" },
-  { href: "/destiny", label: "安平命運輪盤" },
+  { href: "/destiny", label: "命運輪盤" },
   { href: "/#itinerary", label: "一日行程" },
   { href: "/#stays", label: "住宿" },
   { href: "/ai-journey", label: "AI 旅程" },

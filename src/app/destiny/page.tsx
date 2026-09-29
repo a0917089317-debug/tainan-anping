@@ -6,7 +6,7 @@ import { DestinyJourney } from "@/components/destiny-journey";
 import { TravelDiary } from "@/components/travel-diary";
 
 export const metadata: Metadata = {
-  title: "安平命運輪盤 | 台南獨旅",
+  title: "命運輪盤 | 台南獨旅",
 };
 
 const landmarks = [
@@ -90,10 +90,10 @@ export default function DestinyPage() {
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center">
             <p className="mb-4 text-sm tracking-[0.3em] text-muted">
-              ANPING · ROULETTE
+              ROULETTE
             </p>
             <h1 className="font-[family-name:var(--font-serif-tc)] text-4xl leading-tight text-foreground sm:text-5xl">
-              安平命運輪盤
+              命運輪盤
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-foreground sm:text-xl">
               🎡 輕鬆旅行，讓命運替你選一站。

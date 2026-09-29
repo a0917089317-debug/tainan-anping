@@ -7,12 +7,29 @@ import {
   type RouletteWheelHandle,
   type WheelSegment,
 } from "@/components/roulette-wheel";
-import { setTrip } from "@/components/anping-roulette";
-import { mapsUrl, photoFor, placeById, routeUrl } from "@/lib/anping-roulette";
+import {
+  setDistricts,
+  setTrip,
+  TripPanel,
+  useDistricts,
+  useDistrictScope,
+  useMyLocation,
+} from "@/components/anping-roulette";
+import {
+  districtsWithPlaces,
+  mapsUrl,
+  photoFor,
+  placeById,
+  routeKm,
+  routeUrl,
+  shortestRoute,
+} from "@/lib/anping-roulette";
 import {
   budgetLabel,
   budgetOptions,
   costOf,
+  districtById,
+  districts,
   drawCandidates,
   formatMinutes,
   journeyCost,
@@ -25,6 +42,7 @@ import {
   timeOptions,
   TRAVEL_MIN,
   whisperOf,
+  type DistrictId,
   type MoodId,
 } from "@/lib/destiny-journey";
 
@@ -55,11 +73,13 @@ function wheelSegments(ids: string[]): WheelSegment[] {
   return Array.from({ length: base.length * reps }, (_, i) => base[i % base.length]);
 }
 
-type Phase = "setup" | "journey" | "done";
+type Phase = "region" | "setup" | "journey" | "done";
 
 export function DestinyJourney() {
   const wheelRef = useRef<RouletteWheelHandle>(null);
-  const [phase, setPhase] = useState<Phase>("setup");
+  const [phase, setPhase] = useState<Phase>("region");
+  const regions = useDistricts();
+  const scope = useDistrictScope();
   const [minutes, setMinutes] = useState<number | null>(null);
   const [budgetPick, setBudgetPick] = useState<number | "custom" | null>(null);
   const [customBudget, setCustomBudget] = useState("");
@@ -69,6 +89,9 @@ export function DestinyJourney() {
   const [candidates, setCandidates] = useState<string[]>([]);
   const [landed, setLanded] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  // 最近一次「截取最短路線」省下的距離，路線變動後就不再顯示
+  const [sorted, setSorted] = useState<{ key: string; savedKm: number } | null>(null);
+  const { origin, toggleOrigin, locating, locError } = useMyLocation();
   const [error, setError] = useState<string | null>(null);
 
   const customValue = Number(customBudget);
@@ -91,7 +114,13 @@ export function DestinyJourney() {
       : "🎲 沒有特別想法";
 
   const begin = (m: number, b: number, list: MoodId[]) => {
-    const first = drawCandidates({ visited: [], moodIds: list, minutes: m, budget: b });
+    const first = drawCandidates({
+      visited: [],
+      moodIds: list,
+      minutes: m,
+      budget: b,
+      districts: scope,
+    });
     if (!first.length) {
       setError("這樣的條件找不到適合的地方，放寬一點時間或預算試試看？");
       return;
@@ -134,14 +163,31 @@ export function DestinyJourney() {
     const next = [...stops, landed];
     setStops(next);
     setLanded(null);
-    const more = drawCandidates({ visited: next, moodIds, minutes, budget });
+    const more = drawCandidates({ visited: next, moodIds, minutes, budget, districts: scope });
     if (more.length) setCandidates(more);
     else setPhase("done");
   };
 
+  // 保持和區域清單相同的順序
+  const toggleRegion = (id: DistrictId) =>
+    setDistricts((list) =>
+      list.includes(id)
+        ? list.filter((x) => x !== id)
+        : districts.map((d) => d.id).filter((x) => x === id || list.includes(x)),
+    );
+
   const saveToTrip = () => {
     setTrip((t) => [...t, ...stops.filter((id) => !t.includes(id))]);
     setSaved(true);
+  };
+
+  const bestStops = stops.length >= 3 ? shortestRoute(stops) : stops;
+  const isShortest = routeKm(bestStops) >= routeKm(stops) - 0.001;
+  const justSorted = sorted?.key === stops.join() ? sorted : null;
+
+  const sortStops = () => {
+    setSorted({ key: bestStops.join(), savedKm: routeKm(stops) - routeKm(bestStops) });
+    setStops(bestStops);
   };
 
   const summary = (
@@ -152,10 +198,76 @@ export function DestinyJourney() {
     </ul>
   );
 
+  const regionText = regions.map((id) => districtById(id).label).join(" × ");
+  const scopeText = scope.map((id) => districtById(id).label).join(" × ");
+  const noData = regions.filter((id) => !districtsWithPlaces.has(id));
+  const hasData = regions.length > noData.length;
+
+  if (phase === "region") {
+    return (
+      <div className="mx-auto flex max-w-3xl flex-col gap-6">
+        <Step no="第一步" title="🎡 今天去哪裡？交給命運決定" hint="先勾選想探索的區域">
+          {districts.map((d) => {
+            const active = regions.includes(d.id);
+            return (
+              <button
+                key={d.id}
+                type="button"
+                role="checkbox"
+                aria-checked={active}
+                onClick={() => toggleRegion(d.id)}
+                className={chip(active)}
+              >
+                {active ? "☑️" : "☐"} {d.label}
+              </button>
+            );
+          })}
+        </Step>
+
+        <div className="flex flex-col items-center gap-3 text-center">
+          {regions.length ? (
+            <>
+              <p className="text-sm text-muted">已選 {regions.length} 個區域</p>
+              <p className="font-[family-name:var(--font-serif-tc)] text-xl text-foreground">
+                {regionText}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted">至少勾選一個區域</p>
+          )}
+          {noData.length > 0 && (
+            <p className="text-xs text-muted">
+              {noData.map((id) => districtById(id).label).join("、")}的景點還在整理中，目前只會轉到
+              {hasData ? scopeText : "已收錄的區域"}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={() => setPhase("setup")}
+            disabled={!hasData}
+            className="mt-2 rounded-full bg-accent px-10 py-3 text-base font-semibold text-background transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            🎡 開始命運輪盤
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (phase === "setup") {
     return (
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
-        <Step no="第一步" title="⏰ 今天想玩多久？">
+        <p className="text-center text-sm text-muted">
+          📍 今天的區域：{regionText} ·{" "}
+          <button
+            type="button"
+            onClick={() => setPhase("region")}
+            className="underline underline-offset-4 hover:text-accent"
+          >
+            重新選區域
+          </button>
+        </p>
+        <Step no="第二步" title="⏰ 今天想玩多久？">
           {timeOptions.map((t) => (
             <button
               key={t.minutes}
@@ -169,7 +281,7 @@ export function DestinyJourney() {
           ))}
         </Step>
 
-        <Step no="第二步" title="💰 今天想花多少？">
+        <Step no="第三步" title="💰 今天想花多少？">
           {budgetOptions.map((b) => (
             <button
               key={b.label}
@@ -207,7 +319,7 @@ export function DestinyJourney() {
           )}
         </Step>
 
-        <Step no="第三步" title="😌 今天想怎麼旅行？" hint={`最多選 ${MAX_MOODS} 個，不選也可以`}>
+        <Step no="第四步" title="😌 今天想怎麼旅行？" hint={`最多選 ${MAX_MOODS} 個，不選也可以`}>
           {moods.map((m) => {
             const active = picked.includes(m.id);
             return (
@@ -245,6 +357,8 @@ export function DestinyJourney() {
             🎰 都不要選，全部交給命運
           </button>
         </div>
+
+        <TripPanel />
       </div>
     );
   }
@@ -281,17 +395,37 @@ export function DestinyJourney() {
 
         <p className="mt-6 text-sm text-muted">
           共 {stops.length} 站 · 約 {formatMinutes(usedMin)}（含移動）· 約 ${spent.toLocaleString()}
+          {stops.length > 1 && <> · 直線約 {routeKm(stops).toFixed(1)} 公里</>}
         </p>
+        {origin && <p className="mt-2 text-sm text-accent">📍 路線會從你目前的位置出發</p>}
+        {locError && <p className="mt-2 text-sm text-amber-300">{locError}</p>}
+        {justSorted && justSorted.savedKm > 0.05 && (
+          <p className="mt-2 text-sm text-accent">
+            已重新排序，少走約 {justSorted.savedKm.toFixed(1)} 公里
+          </p>
+        )}
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <a
-            href={routeUrl(stops.map((id) => placeById(id).name))}
+            href={routeUrl(stops.map((id) => placeById(id).name), origin ?? undefined)}
             target="_blank"
             rel="noopener noreferrer"
             className={btnPrimary}
           >
             用 Google Maps 開路線
           </a>
+          <button
+            type="button"
+            onClick={sortStops}
+            disabled={stops.length < 3 || isShortest}
+            title={stops.length < 3 ? "至少 3 站才需要排順序" : undefined}
+            className={btnGhost}
+          >
+            {stops.length >= 3 && isShortest ? "✓ 已是最短路線" : "⚡ 截取最短路線"}
+          </button>
+          <button type="button" onClick={toggleOrigin} disabled={locating} className={btnGhost}>
+            {locating ? "定位中…" : origin ? "✓ 從我的位置出發" : "📍 我目前的位置"}
+          </button>
           <button type="button" onClick={saveToTrip} disabled={saved} className={btnGhost}>
             {saved ? "已存進今天行程 ✓" : "存進下方今天行程"}
           </button>

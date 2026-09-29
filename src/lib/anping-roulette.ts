@@ -1,3 +1,5 @@
+import type { DistrictId } from "@/lib/destiny-journey";
+
 export type CategoryId =
   | "heritage"
   | "sea"
@@ -20,6 +22,8 @@ export type Place = {
   // 建議的下一站（Place id）
   next: string;
   tags: CategoryId[];
+  // 沒寫就是安平區
+  district?: DistrictId;
 };
 
 // 小吃輪盤抽的是「品項」，再從品項推薦店家
@@ -367,6 +371,128 @@ export const places: Place[] = [
     next: "yuu",
     tags: ["snack"],
   },
+  // —— 中西區 ——
+  {
+    id: "shennong",
+    name: "神農街",
+    emoji: "🏮",
+    feature: "台南最老的街道之一，老屋掛滿燈籠，傍晚點燈後最有味道",
+    stay: "40～60 分鐘",
+    goodFor: ["拍照", "散步"],
+    next: "kanxi-church",
+    tags: ["walk", "photo", "local"],
+    district: "west-central",
+  },
+  {
+    id: "chihkan",
+    name: "赤崁樓",
+    emoji: "🏯",
+    feature: "荷蘭人興建的普羅民遮城遺址，紅瓦飛簷立在老榕樹下",
+    stay: "30～40 分鐘",
+    goodFor: ["歷史", "拍照"],
+    next: "shennong",
+    tags: ["heritage", "photo"],
+    district: "west-central",
+  },
+  {
+    id: "confucius",
+    name: "孔廟文化園區",
+    emoji: "🏛️",
+    feature: "全臺首學，老榕樹與紅牆巷弄交錯，安靜得可以坐著發呆",
+    stay: "40～60 分鐘",
+    goodFor: ["歷史", "散步"],
+    next: "fuzhong",
+    tags: ["heritage", "walk"],
+    district: "west-central",
+  },
+  {
+    id: "fuzhong",
+    name: "府中街",
+    emoji: "🌸",
+    feature: "孔廟對面的莿桐花巷，假日有手作市集和在地小吃",
+    stay: "20～30 分鐘",
+    goodFor: ["散步", "逛市集"],
+    next: "hayashi",
+    tags: ["walk", "local"],
+    district: "west-central",
+  },
+  {
+    id: "hayashi",
+    name: "林百貨",
+    emoji: "🏬",
+    feature: "台灣第一間百貨公司，頂樓有神社遺跡與展望台",
+    stay: "40～60 分鐘",
+    goodFor: ["歷史", "拍照", "伴手禮"],
+    next: "zhengxing",
+    tags: ["heritage", "photo", "local"],
+    district: "west-central",
+  },
+  {
+    id: "zhengxing",
+    name: "正興街",
+    emoji: "🐈",
+    feature: "老屋改建的咖啡館、選物店與貓巷弄，隨興晃進一間店就是小旅程",
+    stay: "40～60 分鐘",
+    goodFor: ["散步", "拍照"],
+    next: "kokiyo",
+    tags: ["walk", "photo", "local"],
+    district: "west-central",
+  },
+  {
+    id: "guohua",
+    name: "國華街",
+    emoji: "🥟",
+    feature: "永樂市場一帶割包、春捲、小卷米粉一攤接一攤",
+    stay: "40～60 分鐘",
+    goodFor: ["小吃", "散步"],
+    next: "zhengxing",
+    tags: ["snack", "walk"],
+    district: "west-central",
+  },
+  {
+    id: "kanxi-church",
+    name: "看西街長老教會",
+    emoji: "⛪",
+    feature: "仿倫敦聖保羅大教堂的白色圓頂教堂，基督教在台宣教的發源地",
+    stay: "20～30 分鐘",
+    goodFor: ["歷史", "拍照"],
+    next: "guohua",
+    tags: ["heritage", "photo"],
+    district: "west-central",
+  },
+  {
+    id: "kokiyo",
+    name: "蜷尾家甘味處",
+    emoji: "🍦",
+    feature: "把日式散步霜淇淋帶進台南的名店，每日限量兩款口味",
+    stay: "20～30 分鐘",
+    goodFor: ["甜點"],
+    next: "taicheng",
+    tags: ["snack"],
+    district: "west-central",
+  },
+  {
+    id: "taicheng",
+    name: "泰成水果店",
+    emoji: "🍈",
+    feature: "1935 年創立的冰品老字號，招牌是哈密瓜冰碗",
+    stay: "20～30 分鐘",
+    goodFor: ["甜點", "水果"],
+    next: "brian",
+    tags: ["snack"],
+    district: "west-central",
+  },
+  {
+    id: "brian",
+    name: "布萊恩紅茶正興總店",
+    emoji: "🧋",
+    feature: "以特調茶品與嚴選茶葉聞名的在地人氣茶飲",
+    stay: "20～30 分鐘",
+    goodFor: ["飲料"],
+    next: "zhengxing",
+    tags: ["cafe"],
+    district: "west-central",
+  },
 ];
 
 export const dishes: Dish[] = [
@@ -379,32 +505,51 @@ export const dishes: Dish[] = [
   { id: "shrimp-cracker", name: "蝦餅", emoji: "🦐", shops: ["shrimp-cracker"] },
   { id: "candied", name: "蜜餞", emoji: "🍬", shops: ["lin"] },
   { id: "nabeyaki", name: "鍋燒意麵", emoji: "🍲", shops: ["kingfish"] },
+  { id: "soft-serve", name: "霜淇淋", emoji: "🍦", shops: ["kokiyo"] },
+  { id: "fruit-ice", name: "水果冰", emoji: "🍈", shops: ["taicheng"] },
+  { id: "gua-bao", name: "割包", emoji: "🥟", shops: ["guohua"] },
 ];
 
 export const placeById = (id: string) => places.find((p) => p.id === id)!;
 
-export const placesIn = (cat: CategoryId) =>
-  places.filter((p) => p.tags.includes(cat));
+export const districtOf = (place: Place): DistrictId => place.district ?? "anping";
+
+/** 已收錄景點的區域 */
+export const districtsWithPlaces = new Set(places.map(districtOf));
+
+/** districts 沒給就是全部區域 */
+const inDistricts = (place: Place, districts?: DistrictId[]) =>
+  !districts || districts.includes(districtOf(place));
+
+export const placesIn = (cat: CategoryId, districts?: DistrictId[]) =>
+  places.filter((p) => p.tags.includes(cat) && inDistricts(p, districts));
+
+export const dishesIn = (districts?: DistrictId[]) =>
+  dishes.filter((d) => d.shops.some((id) => inDistricts(placeById(id), districts)));
 
 /** 抽到的品項店家排前面，其餘小吃店當「換一家」的附近推薦。 */
-export const recommendationsFor = (dish: Dish) => [
+export const recommendationsFor = (dish: Dish, districts?: DistrictId[]) => [
   ...dish.shops,
-  ...placesIn("snack")
+  ...placesIn("snack", districts)
     .map((p) => p.id)
     .filter((id) => !dish.shops.includes(id)),
 ];
 
+// 搜尋時加上所在區域，避免搜到同名店家
+const areaOf = (name: string) =>
+  places.find((p) => p.name === name)?.district === "west-central" ? "台南中西區" : "台南安平";
+
 export const mapsUrl = (name: string) =>
-  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`台南安平 ${name}`)}`;
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${areaOf(name)} ${name}`)}`;
 
 export const googleUrl = (name: string) =>
-  `https://www.google.com/search?q=${encodeURIComponent(`台南安平 ${name}`)}`;
+  `https://www.google.com/search?q=${encodeURIComponent(`${areaOf(name)} ${name}`)}`;
 
 /** origin 為「緯度,經度」時，會當成路線的第一站 */
 export const routeUrl = (names: string[], origin?: string) =>
   `https://www.google.com/maps/dir/${[
     ...(origin ? [origin] : []),
-    ...names.map((n) => encodeURIComponent(`台南安平 ${n}`)),
+    ...names.map((n) => encodeURIComponent(`${areaOf(n)} ${n}`)),
   ].join("/")}`;
 
 // 各地點的約略座標 [緯度, 經度]，只用來排順路的先後順序
@@ -442,6 +587,17 @@ const coords: Record<string, [number, number]> = {
   lin: [23.0013, 120.1608],
   wenzhang: [22.9975, 120.184],
   kingfish: [22.9985, 120.158],
+  shennong: [22.9973, 120.1968],
+  chihkan: [22.9975, 120.2025],
+  confucius: [22.9905, 120.2045],
+  fuzhong: [22.9898, 120.2048],
+  hayashi: [22.992, 120.1995],
+  zhengxing: [22.9915, 120.1968],
+  guohua: [22.9935, 120.1978],
+  "kanxi-church": [22.9965, 120.1955],
+  kokiyo: [22.9914, 120.1966],
+  taicheng: [22.9912, 120.1961],
+  brian: [22.9913, 120.197],
 };
 
 /** 兩地直線距離（公里） */
@@ -558,6 +714,11 @@ const photos: Record<string, string> = {
   niuyuan: "/images/牛園火鍋-1.jpg",
   qingping: "/images/慶平海產.jpg",
   kingfish: "/images/金魚京.jpg",
+  shennong: "/images/神農街.webp",
+  chihkan: "/images/赤崁樓.jpg",
+  confucius: "/images/臺南孔子廟_大成坊.jpg",
+  hayashi: "/images/林百貨.webp",
+  zhengxing: "/images/正興街.png",
 };
 
 export const photoFor = (id: string): string | undefined => photos[id];

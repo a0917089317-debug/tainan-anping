@@ -1,4 +1,4 @@
-import { placeById, places, type Place } from "@/lib/anping-roulette";
+import { districtOf, placeById, places, type Place } from "@/lib/anping-roulette";
 
 export type MoodId =
   | "sea"
@@ -67,6 +67,14 @@ const costs: Record<string, number> = {
   lin: 150,
   wenzhang: 150,
   kingfish: 70,
+  chihkan: 70,
+  confucius: 40,
+  hayashi: 200,
+  zhengxing: 100,
+  guohua: 150,
+  kokiyo: 90,
+  taicheng: 200,
+  brian: 70,
 };
 
 // 抽到時的一句話
@@ -104,6 +112,17 @@ const whispers: Record<string, string> = {
   lin: "挑幾包百年蜜餞，把安平的甜帶回家。",
   wenzhang: "一碗現切牛肉湯，暖胃也暖心。",
   kingfish: "一大碗熱呼呼的鍋燒意麵，在地人的私房好味道。",
+  shennong: "等紅燈籠亮起來，老街會換上另一種表情。",
+  chihkan: "在老榕樹下抬頭看飛簷，三百多年的故事都在這裡。",
+  confucius: "找張長椅坐下，讓全臺首學的安靜陪你一會兒。",
+  fuzhong: "逛逛巷口的手作小攤，帶一件小東西回家。",
+  hayashi: "搭上老電梯到頂樓，看看神社遺跡和台南的天空。",
+  zhengxing: "隨便晃進一間小店，也許會遇到巷弄裡的貓。",
+  guohua: "空著肚子來，一攤接一攤慢慢吃。",
+  "kanxi-church": "繞進巷子找找那座白色圓頂，安靜地待一下。",
+  kokiyo: "一支限定口味的霜淇淋，今天的小確幸。",
+  taicheng: "一碗滿滿的哈密瓜冰，夏天就該這樣吃。",
+  brian: "來一杯特調紅茶，邊走邊喝最台南。",
 };
 
 // 適合放空的地方：人少、能坐、能發呆
@@ -118,6 +137,7 @@ const relaxIds = new Set([
   "haishan",
   "yuu",
   "tongji",
+  "confucius",
 ]);
 
 export const costOf = (id: string) => costs[id] ?? 0;
@@ -189,11 +209,13 @@ export function drawCandidates({
   moodIds,
   minutes,
   budget,
+  districts,
 }: {
   visited: string[];
   moodIds: MoodId[];
   minutes: number;
   budget: number;
+  districts: DistrictId[];
 }): string[] {
   const minutesLeft = minutes - journeyMinutes(visited);
   const budgetLeft = budget - journeyCost(visited);
@@ -202,6 +224,7 @@ export function drawCandidates({
   const pool = places.filter(
     (p) =>
       !visited.includes(p.id) &&
+      districts.includes(districtOf(p)) &&
       (moodIds.length === 0 || moodIds.some((m) => matchesMood(p, m))) &&
       minutesOf(p) + travel <= minutesLeft &&
       costOf(p.id) <= budgetLeft,
@@ -236,3 +259,19 @@ export function budgetLabel(amount: number) {
 export function timeLabel(minutes: number) {
   return timeOptions.find((t) => t.minutes === minutes)?.label ?? formatMinutes(minutes);
 }
+
+export type DistrictId = "anping" | "west-central" | "north" | "east" | "south" | "yongkang";
+
+// 命運輪盤第一步先勾選要探索的區域
+export const districts: { id: DistrictId; label: string; emoji: string }[] = [
+  { id: "anping", label: "安平區", emoji: "🏰" },
+  { id: "west-central", label: "中西區", emoji: "🏮" },
+  { id: "north", label: "北區", emoji: "🏘️" },
+  { id: "east", label: "東區", emoji: "🌳" },
+  { id: "south", label: "南區", emoji: "🌾" },
+  { id: "yongkang", label: "永康區", emoji: "🍜" },
+];
+
+export const DEFAULT_DISTRICTS: DistrictId[] = ["anping", "west-central"];
+
+export const districtById = (id: DistrictId) => districts.find((d) => d.id === id)!;

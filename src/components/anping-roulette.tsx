@@ -9,7 +9,8 @@ import {
 } from "@/components/roulette-wheel";
 import {
   categories,
-  dishes,
+  dishesIn,
+  districtsWithPlaces,
   googleUrl,
   mapsUrl,
   placeById,
@@ -23,6 +24,12 @@ import {
   type CategoryId,
   type Place,
 } from "@/lib/anping-roulette";
+import {
+  DEFAULT_DISTRICTS,
+  districtById,
+  districts,
+  type DistrictId,
+} from "@/lib/destiny-journey";
 
 // 今天行程存在 localStorage，重新整理頁面也不會消失
 const TRIP_KEY = "anping-roulette-trip";
@@ -56,6 +63,44 @@ function subscribeTrip(listener: () => void) {
 
 export const useTrip = () => useSyncExternalStore(subscribeTrip, readTrip, () => NO_TRIP);
 
+// 第一步勾選的區域，命運旅程和自由轉輪盤共用，也存在 localStorage
+const DISTRICTS_KEY = "roulette-districts";
+const districtIds = new Set<string>(districts.map((d) => d.id));
+const districtListeners = new Set<() => void>();
+let districtCache: DistrictId[] | null = null;
+
+function readDistricts() {
+  if (districtCache) return districtCache;
+  districtCache = DEFAULT_DISTRICTS;
+  try {
+    const saved = JSON.parse(localStorage.getItem(DISTRICTS_KEY) ?? "null");
+    if (Array.isArray(saved)) districtCache = saved.filter((id) => districtIds.has(id));
+  } catch {}
+  return districtCache;
+}
+
+export function setDistricts(update: (list: DistrictId[]) => DistrictId[]) {
+  districtCache = update(readDistricts());
+  try {
+    localStorage.setItem(DISTRICTS_KEY, JSON.stringify(districtCache));
+  } catch {}
+  districtListeners.forEach((listener) => listener());
+}
+
+function subscribeDistricts(listener: () => void) {
+  districtListeners.add(listener);
+  return () => districtListeners.delete(listener);
+}
+
+export const useDistricts = () =>
+  useSyncExternalStore(subscribeDistricts, readDistricts, () => DEFAULT_DISTRICTS);
+
+/** 勾選的區域中有收錄景點的；一個都沒有時就用全部已收錄的區域 */
+export function useDistrictScope(): DistrictId[] {
+  const picked = useDistricts().filter((id) => districtsWithPlaces.has(id));
+  return picked.length ? picked : [...districtsWithPlaces];
+}
+
 const btnPrimary =
   "rounded-full bg-accent px-5 py-2 text-sm font-semibold text-background transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50";
 const btnGhost =
@@ -66,52 +111,31 @@ export function AnpingRoulette() {
   // 第一層抽中、但還沒打開的類型
   const [landedCat, setLandedCat] = useState<CategoryId | null>(null);
   // 目前打開的第二層輪盤
-  const [openCat, setOpenCat] = useState<CategoryId | null>(null);
+  const [openCatState, setOpenCat] = useState<CategoryId | null>(null);
   const [placeId, setPlaceId] = useState<string | null>(null);
   const [dishId, setDishId] = useState<string | null>(null);
   const [shopIdx, setShopIdx] = useState(0);
-  // 最近一次「排出最短路線」省下的距離，行程變動後就不再顯示
-  const [sorted, setSorted] = useState<{ key: string; savedKm: number } | null>(null);
-  // 使用者目前位置「緯度,經度」，有值時路線從這裡出發
-  const [origin, setOrigin] = useState<string | null>(null);
-  const [locating, setLocating] = useState(false);
-  const [locError, setLocError] = useState<string | null>(null);
-
-  const toggleOrigin = () => {
-    if (origin) {
-      setOrigin(null);
-      return;
-    }
-    if (!navigator.geolocation) {
-      setLocError("這個瀏覽器不支援定位");
-      return;
-    }
-    setLocating(true);
-    setLocError(null);
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setOrigin(`${coords.latitude.toFixed(6)},${coords.longitude.toFixed(6)}`);
-        setLocating(false);
-      },
-      (err) => {
-        setLocError(err.code === err.PERMISSION_DENIED ? "無法取得位置，請允許瀏覽器定位權限" : "定位失敗，請稍後再試");
-        setLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
-  };
   const trip = useTrip();
+  const picked = useDistricts();
+  const scope = useDistrictScope();
+  const dishes = dishesIn(scope);
+  // 只放勾選區域裡有地點的類型
+  const cats = categories.filter((c) =>
+    c.id === "snack" ? dishes.length > 0 : placesIn(c.id, scope).length > 0,
+  );
+  // 換區域後類型不見了，就回到第一層
+  const openCat = cats.some((c) => c.id === openCatState) ? openCatState : null;
 
-  const cat = categories.find((c) => c.id === openCat);
-  const landed = categories.find((c) => c.id === landedCat);
+  const cat = cats.find((c) => c.id === openCat);
+  const landed = cats.find((c) => c.id === landedCat);
   const dish = dishes.find((d) => d.id === dishId);
   const place = placeId ? placeById(placeId) : null;
-  const recs = dish ? recommendationsFor(dish) : [];
+  const recs = dish ? recommendationsFor(dish, scope) : [];
   const shop = dish ? placeById(recs[shopIdx % recs.length]) : null;
 
-  const options: Place[] = openCat && openCat !== "snack" ? placesIn(openCat) : [];
+  const options: Place[] = openCat && openCat !== "snack" ? placesIn(openCat, scope) : [];
   const segments: WheelSegment[] = !openCat
-    ? categories.map((c) => ({ label: c.label, emoji: c.emoji }))
+    ? cats.map((c) => ({ label: c.label, emoji: c.emoji }))
     : openCat === "snack"
       ? dishes.map((d) => ({ label: d.name, emoji: d.emoji }))
       : options.map((p) => ({ label: p.name.replace(/（.*）/, "") }));
@@ -136,7 +160,7 @@ export function AnpingRoulette() {
 
   const handleResult = (i: number) => {
     if (!openCat) {
-      setLandedCat(categories[i].id);
+      setLandedCat(cats[i].id);
     } else if (openCat === "snack") {
       setPlaceId(null);
       setDishId(dishes[i].id);
@@ -149,16 +173,6 @@ export function AnpingRoulette() {
 
   const spinAgain = () => wheelRef.current?.spin();
 
-  const tripKm = routeKm(trip);
-  const bestTrip = trip.length >= 3 ? shortestRoute(trip) : trip;
-  const isShortest = routeKm(bestTrip) >= tripKm - 0.001;
-  const justSorted = sorted?.key === trip.join() ? sorted : null;
-
-  const sortTrip = () => {
-    setSorted({ key: bestTrip.join(), savedKm: tripKm - routeKm(bestTrip) });
-    setTrip(() => bestTrip);
-  };
-
   const addToTrip = (id: string) =>
     setTrip((t) => (t.includes(id) ? t : [...t, id]));
 
@@ -169,7 +183,7 @@ export function AnpingRoulette() {
 
   const pickCategory = (id: string) => {
     setLandedCat(null);
-    setOpenCat(categories.find((c) => c.id === id)?.id ?? null);
+    setOpenCat(cats.find((c) => c.id === id)?.id ?? null);
     clearPick();
   };
 
@@ -183,7 +197,7 @@ export function AnpingRoulette() {
     <div className="flex flex-col gap-12">
       <nav aria-label="輪盤層級" className="flex flex-wrap items-center justify-center gap-2 text-sm">
         <button type="button" onClick={goHome} className="text-muted hover:text-accent">
-          安平探索 🎡
+          {(picked.length ? picked : scope).map((id) => districtById(id).label).join(" × ")} 探索 🎡
         </button>
         {cat && (
           <>
@@ -229,9 +243,9 @@ export function AnpingRoulette() {
                 label="第一層：類型"
                 value={openCat ?? ""}
                 placeholder="選擇類型…"
-                options={categories.map((c) => ({
+                options={cats.map((c) => ({
                   value: c.id,
-                  label: `${c.emoji} ${c.label}（${c.id === "snack" ? dishes.length : placesIn(c.id).length}）`,
+                  label: `${c.emoji} ${c.label}（${c.id === "snack" ? dishes.length : placesIn(c.id, scope).length}）`,
                 }))}
                 onChange={pickCategory}
               />
@@ -272,7 +286,7 @@ export function AnpingRoulette() {
             {!openCat && !landed && (
               <Intro
                 title="第一層：今天想探索什麼？"
-                text="按下開始，小白球會先幫你抽出一種玩法：古蹟、海景、小吃、餐廳、咖啡、拍照、散步或在地特色。"
+                text={`按下開始，小白球會先幫你抽出一種玩法：${cats.map((c) => c.label).join("、")}。`}
               />
             )}
   
@@ -392,99 +406,154 @@ export function AnpingRoulette() {
         </div>
       </div>
 
-      <section className="rounded-2xl border border-border bg-background-elevated p-6 sm:p-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-[family-name:var(--font-serif-tc)] text-2xl text-foreground">
-            🗺️ 今天行程
-          </h2>
-          {trip.length > 0 && (
-            <div className="flex flex-wrap gap-3">
-              <a
-                href={routeUrl(trip.map((id) => placeById(id).name), origin ?? undefined)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={btnPrimary}
-              >
-                用 Google Maps 開路線
-              </a>
-              <button type="button" onClick={toggleOrigin} disabled={locating} className={btnGhost}>
-                {locating ? "定位中…" : origin ? "✓ 從我的位置出發" : "📍 從我的位置出發"}
-              </button>
+      <TripPanel />
+    </div>
+  );
+}
+
+/** 今天行程：命運輪盤各處共用同一份 localStorage 行程 */
+/** 使用者目前位置「緯度,經度」，有值時路線從這裡出發 */
+export function useMyLocation() {
+  const [origin, setOrigin] = useState<string | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locError, setLocError] = useState<string | null>(null);
+
+  const toggleOrigin = () => {
+    if (origin) {
+      setOrigin(null);
+      return;
+    }
+    if (!navigator.geolocation) {
+      setLocError("這個瀏覽器不支援定位");
+      return;
+    }
+    setLocating(true);
+    setLocError(null);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setOrigin(`${coords.latitude.toFixed(6)},${coords.longitude.toFixed(6)}`);
+        setLocating(false);
+      },
+      (err) => {
+        setLocError(err.code === err.PERMISSION_DENIED ? "無法取得位置，請允許瀏覽器定位權限" : "定位失敗，請稍後再試");
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
+
+  return { origin, clearOrigin: () => setOrigin(null), toggleOrigin, locating, locError };
+}
+
+export function TripPanel() {
+  const trip = useTrip();
+  // 最近一次「排出最短路線」省下的距離，行程變動後就不再顯示
+  const [sorted, setSorted] = useState<{ key: string; savedKm: number } | null>(null);
+  const { origin, clearOrigin, toggleOrigin, locating, locError } = useMyLocation();
+
+  const tripKm = routeKm(trip);
+  const bestTrip = trip.length >= 3 ? shortestRoute(trip) : trip;
+  const isShortest = routeKm(bestTrip) >= tripKm - 0.001;
+  const justSorted = sorted?.key === trip.join() ? sorted : null;
+
+  const sortTrip = () => {
+    setSorted({ key: bestTrip.join(), savedKm: tripKm - routeKm(bestTrip) });
+    setTrip(() => bestTrip);
+  };
+
+  return (
+    <section className="rounded-2xl border border-border bg-background-elevated p-6 sm:p-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-[family-name:var(--font-serif-tc)] text-2xl text-foreground">
+          🗺️ 今天行程
+        </h2>
+        {trip.length > 0 && (
+          <div className="flex flex-wrap gap-3">
+            <a
+              href={routeUrl(trip.map((id) => placeById(id).name), origin ?? undefined)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={btnPrimary}
+            >
+              用 Google Maps 開路線
+            </a>
+            <button type="button" onClick={toggleOrigin} disabled={locating} className={btnGhost}>
+              {locating ? "定位中…" : origin ? "✓ 從我的位置出發" : "📍 從我的位置出發"}
+            </button>
+            <button
+              type="button"
+              onClick={sortTrip}
+              disabled={trip.length < 3 || isShortest}
+              title={trip.length < 3 ? "至少 3 站才需要排順序" : undefined}
+              className={btnGhost}
+            >
+              {trip.length >= 3 && isShortest ? "✓ 已是最短路線" : "⚡ 排出最短路線"}
+            </button>
+            <button type="button" onClick={() => setTrip(() => [])} className={btnGhost}>
+              清空
+            </button>
+          </div>
+        )}
+      </div>
+
+      {trip.length > 1 && (
+        <p className="mt-3 text-sm text-muted">
+          全程直線距離約 {tripKm.toFixed(1)} 公里
+          {justSorted && justSorted.savedKm > 0.05 && (
+            <span className="ml-2 text-accent">
+              已重新排序，少走約 {justSorted.savedKm.toFixed(1)} 公里
+            </span>
+          )}
+        </p>
+      )}
+
+      {locError && <p className="mt-3 text-sm text-amber-300">{locError}</p>}
+
+      {trip.length === 0 ? (
+        <p className="mt-4 text-muted">還沒有行程，轉到喜歡的地方就按「加入今天行程」。</p>
+      ) : (
+        <ol className="mt-6 grid gap-3 sm:grid-cols-2">
+          {origin && (
+            <li className="flex items-center gap-3 rounded-lg border border-accent px-3 py-2">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-background">
+                起
+              </span>
+              <span className="flex-1 text-foreground">📍 我的位置</span>
               <button
                 type="button"
-                onClick={sortTrip}
-                disabled={trip.length < 3 || isShortest}
-                title={trip.length < 3 ? "至少 3 站才需要排順序" : undefined}
-                className={btnGhost}
+                onClick={clearOrigin}
+                aria-label="取消從我的位置出發"
+                className="text-muted hover:text-accent"
               >
-                {trip.length >= 3 && isShortest ? "✓ 已是最短路線" : "⚡ 排出最短路線"}
+                ✕
               </button>
-              <button type="button" onClick={() => setTrip(() => [])} className={btnGhost}>
-                清空
-              </button>
-            </div>
+            </li>
           )}
-        </div>
-
-        {trip.length > 1 && (
-          <p className="mt-3 text-sm text-muted">
-            全程直線距離約 {tripKm.toFixed(1)} 公里
-            {justSorted && justSorted.savedKm > 0.05 && (
-              <span className="ml-2 text-accent">
-                已重新排序，少走約 {justSorted.savedKm.toFixed(1)} 公里
-              </span>
-            )}
-          </p>
-        )}
-
-        {locError && <p className="mt-3 text-sm text-amber-300">{locError}</p>}
-
-        {trip.length === 0 ? (
-          <p className="mt-4 text-muted">還沒有行程，轉到喜歡的地方就按「加入今天行程」。</p>
-        ) : (
-          <ol className="mt-6 grid gap-3 sm:grid-cols-2">
-            {origin && (
-              <li className="flex items-center gap-3 rounded-lg border border-accent px-3 py-2">
+          {trip.map((id, i) => {
+            const p = placeById(id);
+            return (
+              <li key={id} className="flex items-center gap-3 rounded-lg border border-border px-3 py-2">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-background">
-                  起
+                  {i + 1}
                 </span>
-                <span className="flex-1 text-foreground">📍 我的位置</span>
+                <span className="flex-1 text-foreground">
+                  {p.emoji} {p.name}
+                  <span className="ml-2 text-xs text-muted">{p.stay}</span>
+                </span>
                 <button
                   type="button"
-                  onClick={() => setOrigin(null)}
-                  aria-label="取消從我的位置出發"
+                  onClick={() => setTrip((t) => t.filter((x) => x !== id))}
+                  aria-label={`從行程移除 ${p.name}`}
                   className="text-muted hover:text-accent"
                 >
                   ✕
                 </button>
               </li>
-            )}
-            {trip.map((id, i) => {
-              const p = placeById(id);
-              return (
-                <li key={id} className="flex items-center gap-3 rounded-lg border border-border px-3 py-2">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-background">
-                    {i + 1}
-                  </span>
-                  <span className="flex-1 text-foreground">
-                    {p.emoji} {p.name}
-                    <span className="ml-2 text-xs text-muted">{p.stay}</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setTrip((t) => t.filter((x) => x !== id))}
-                    aria-label={`從行程移除 ${p.name}`}
-                    className="text-muted hover:text-accent"
-                  >
-                    ✕
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
-        )}
-      </section>
-    </div>
+            );
+          })}
+        </ol>
+      )}
+    </section>
   );
 }
 
