@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { InstagramGrid } from "@/components/instagram-grid";
 
 export const metadata: Metadata = {
@@ -221,6 +222,13 @@ export default function WestCentralPage() {
             <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-muted">
               台南最老的城區，古蹟、老街和小店都在走路可到的距離，最適合一個人慢慢晃。
             </p>
+            <Link
+              href="/destiny"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+            >
+              🎡 不知道去哪？交給命運輪盤
+              <span aria-hidden>→</span>
+            </Link>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2">

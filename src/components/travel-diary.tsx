@@ -23,7 +23,7 @@ const cheers: Record<string, string> = {
 };
 
 const MAX_TEXT = 40;
-const DEFAULT_TEXT = "今天一個人去了安平。";
+const DEFAULT_TEXT = "今天一個人去了台南。";
 // 旅行卡底圖，每次生成隨機換一張
 const backgrounds = [
   "億載金城.webp",
@@ -145,7 +145,7 @@ async function drawCard({
 
   ctx.fillStyle = "#f1ece1";
   ctx.font = `700 68px ${serif}`;
-  ctx.fillText("我的安平旅行卡", W / 2, 215);
+  ctx.fillText("我的旅行卡", W / 2, 215);
 
   const today = new Date();
   ctx.fillStyle = "#a89e8d";
@@ -188,7 +188,7 @@ async function drawCard({
 
   ctx.fillStyle = "#d3a45a";
   ctx.font = `28px ${sans}`;
-  ctx.fillText(`${name ? `${name} · ` : ""}台南獨旅 #一個人的安平`, W / 2, H - 110);
+  ctx.fillText(`${name ? `${name} · ` : ""}台南獨旅 #一個人的台南`, W / 2, H - 110);
 
   return new Promise<Blob>((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), "image/png"),
@@ -207,7 +207,7 @@ export function TravelDiary() {
 
   const feeling = feelings.find((f) => f.id === feelingId);
   const sentence = text.trim() || DEFAULT_TEXT;
-  const shareText = `${feeling?.emoji ?? ""} ${sentence}\n#台南獨旅 #一個人的安平`;
+  const shareText = `${feeling?.emoji ?? ""} ${sentence}\n#台南獨旅 #一個人的台南`;
 
   const generate = async () => {
     if (!feeling) return;
@@ -225,7 +225,7 @@ export function TravelDiary() {
       if (card) URL.revokeObjectURL(card.url);
       setCard({
         url: URL.createObjectURL(blob),
-        file: new File([blob], "我的安平旅行卡.png", { type: "image/png" }),
+        file: new File([blob], "我的旅行卡.png", { type: "image/png" }),
         photo,
       });
     } catch {
@@ -325,7 +325,7 @@ export function TravelDiary() {
             disabled={!feeling || busy}
             className={`${btnPrimary} mt-6`}
           >
-            {busy ? "生成中…" : card ? "重新生成旅行卡" : "✨ 生成我的安平旅行卡"}
+            {busy ? "生成中…" : card ? "重新生成旅行卡" : "✨ 生成我的旅行卡"}
           </button>
           {!feeling && <p className="mt-2 text-xs text-muted">先選一個今天的心情</p>}
         </div>
@@ -338,7 +338,7 @@ export function TravelDiary() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={card.url}
-              alt={`我的安平旅行卡：${sentence}`}
+              alt={`我的旅行卡：${sentence}`}
               className="w-full max-w-sm rounded-xl border border-border shadow-2xl"
             />
             <div className="flex flex-wrap justify-center gap-3">
