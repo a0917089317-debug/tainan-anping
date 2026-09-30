@@ -40,6 +40,58 @@ const instagram: Record<string, string[]> = {
     "https://www.instagram.com/p/Dbaj3x8CGcR/",
     "https://www.instagram.com/p/DZuYu7iFAbX/",
   ],
+  "small-fort": ["https://www.instagram.com/p/DQ-uaSQk-Ve/"],
+  haishan: ["https://www.instagram.com/p/B5P34SAHBuJ/"],
+  tianhou: [
+    "https://www.instagram.com/p/C_m_Tv2Pgos/",
+    "https://www.instagram.com/p/CtIpLDyvo5v/",
+  ],
+  zhu: [
+    "https://www.instagram.com/p/OuwCz/",
+    "https://www.instagram.com/p/fBlws/",
+    "https://www.instagram.com/p/B3Cfqe7ghIh/",
+  ],
+  "oyster-kiln": ["https://www.instagram.com/p/DOlblemkRve/"],
+  "fishermans-wharf": [
+    "https://www.instagram.com/p/CgapC_ThGDc/",
+    "https://www.instagram.com/p/DNdcQCAT5X_/?img_index=1",
+    "https://www.instagram.com/p/DNdcQCAT5X_/?img_index=2",
+  ],
+  "big-fish": [
+    "https://www.instagram.com/p/CDYxWv4j_eZ/",
+    "https://www.instagram.com/p/C92b8EmSAYu/",
+    "https://www.instagram.com/p/CXVEnXNFJBE/",
+  ],
+  sunset: [
+    "https://www.instagram.com/p/CwCmhX9h4fB/",
+    "https://www.instagram.com/p/CFjO7-6Bjd8/",
+    "https://www.instagram.com/p/6ociSdFmJ1/",
+  ],
+  linmoniang: [
+    "https://www.instagram.com/p/DRoWhP0E8Cd/?img_index=1",
+    "https://www.instagram.com/p/CpH_4D9hscn/",
+    "https://www.instagram.com/p/DRoWhP0E8Cd/?img_index=4",
+  ],
+  canal: [
+    "https://www.instagram.com/p/DNdcQCAT5X_/?img_index=3",
+    "https://www.instagram.com/p/DNdcQCAT5X_/?img_index=4",
+    "https://www.instagram.com/p/DNdcQCAT5X_/?img_index=9",
+  ],
+  yuguang: [
+    "https://www.instagram.com/p/C7mHuIDy3MH/",
+    "https://www.instagram.com/p/DOoI08KkhPX/",
+  ],
+  "harbor-park": [
+    "https://www.instagram.com/p/DMkTgO-Pg0j/?img_index=3",
+    "https://www.instagram.com/p/DUf0N9XFPM6/?img_index=3",
+    "https://www.instagram.com/p/BtewmvWHlx2/",
+    "https://www.instagram.com/p/Bwv_37-pJ1z/",
+  ],
+  deyang: [
+    "https://www.instagram.com/p/Dd25sCGk1F2/",
+    "https://www.instagram.com/p/DcBCJioGqPG/",
+    "https://www.instagram.com/p/Da494i-oFFs/",
+  ],
 };
 
 // 卡片內的分類資訊小框（同中西區頁）
@@ -119,6 +171,48 @@ const sections: Record<
       items: [
         { label: "地址", text: "708臺南市安平區王城里安北路233巷3號" },
         { label: "電話號碼", text: "06 391 1105" },
+      ],
+    },
+  ],
+  haishan: [
+    {
+      title: "🏛️ 景點介紹",
+      items: [
+        {
+          label: "地點",
+          text: "臺南市安平區延平路35號（現多結合「考古埕時光使館」營運）",
+        },
+        {
+          label: "營運時間",
+          text: "上午 9:30 至下午 17:30（每週三、四休館）",
+        },
+        {
+          label: "歷史背景",
+          text: "清朝時駐守安平的福州兵營所建之聯絡聚會會館，也是現存安平少數保留的傳統會館建築。",
+        },
+        {
+          label: "近期亮點",
+          text: "館內常態性舉辦結合繪本角色「芒狗狗」的沉浸式實境解謎導覽活動，適合親子與喜愛歷史尋寶的遊客。",
+        },
+      ],
+    },
+  ],
+  zhu: [
+    {
+      title: "🎫 參觀資訊",
+      items: [
+        {
+          label: "免費的水墨體驗區",
+          text: "二樓現場貼心地提供了文房四寶與水墨，遊客可以用毛筆沾水在特殊的練習紙上揮毫，體驗書法大師的運筆神韻，非常受小朋友及外國遊客歡迎。",
+        },
+        {
+          label: "高CP值的三合一門票",
+          text: "這裡無法單獨購票，門票是與安平樹屋及德記洋行共用的（全票 70 元 / 半票 35 元 / 臺南市民憑證免費）。我建議線上先在 Klook 旅遊平台 看看有沒有 9 折門票優惠，可以省點小錢。",
+        },
+        {
+          label: "參觀動線建議",
+          text: "整個園區大約可安排 1 到 1.5 小時。建議先到德記洋行看蠟像與開拓史，再到充滿魔幻原始感的安平樹屋步道走走，最後來到朱玖瑩故居，在充滿墨香與冷氣的日式建築裡靜心歇腳，為安平文化之旅做個完美的句點。",
+        },
       ],
     },
   ],
@@ -246,7 +340,7 @@ export default function AnpingPage() {
                           ))}
                           {posts && (
                             <p className="mt-4 text-xs text-muted/70">
-                              本區照片顯示介接 Instagram，照片著作權屬拍攝者所有
+                              本區內容由 Instagram 公開貼文嵌入顯示，照片著作權歸原著作權人所有，本站不主張相關照片之著作權。
                             </p>
                           )}
                         </div>

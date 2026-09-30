@@ -316,7 +316,7 @@ export default function WestCentralPage() {
                   )}
                   {spot.instagram && (
                     <p className="mt-4 text-xs text-muted/70">
-                      本區照片顯示介接 Instagram，照片著作權屬拍攝者所有
+                      本區內容由 Instagram 公開貼文嵌入顯示，照片著作權歸原著作權人所有，本站不主張相關照片之著作權。
                     </p>
                   )}
                 </div>

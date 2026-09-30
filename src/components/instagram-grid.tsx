@@ -1,3 +1,10 @@
+/** 貼文網址帶 ?img_index=N 時取多圖貼文的第 N 張 */
+function imageSrc(post: string) {
+  const code = post.match(/\/p\/([^/?]+)/)?.[1];
+  const index = new URL(post).searchParams.get("img_index");
+  return `/api/instagram?code=${code}${index && index !== "1" ? `&index=${index}` : ""}`;
+}
+
 /** Instagram 貼文照片格子；圖片經 /api/instagram 向 IG 取得 */
 export function InstagramGrid({ posts, name }: { posts: string[]; name: string }) {
   // 三格時第一格佔左半邊整欄，右邊上下兩格，避免留下空格
@@ -22,7 +29,7 @@ export function InstagramGrid({ posts, name }: { posts: string[]; name: string }
           {/* 經 /api/instagram 轉來的 IG 圖片，不經過 next/image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`/api/instagram?code=${post.match(/\/p\/([^/]+)/)?.[1]}`}
+            src={imageSrc(post)}
             alt={`${name}（Instagram 貼文）`}
             loading="lazy"
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover/ig:scale-105"
