@@ -3,27 +3,27 @@ import Image from "next/image";
 import { Parallax } from "@/components/parallax";
 import { AnpingRoulette } from "@/components/anping-roulette";
 import { DestinyJourney } from "@/components/destiny-journey";
+import { InstagramGrid } from "@/components/instagram-grid";
 import { TravelDiary } from "@/components/travel-diary";
+import { instagramPosts } from "@/lib/instagram";
 
 export const metadata: Metadata = {
   title: "命運輪盤 | 台南獨旅",
 };
 
+// 照片用該地點的第一則 IG 貼文（placeId 對應 src/lib/instagram.ts）
 const landmarks = [
   {
     title: "大魚的祝福",
     desc: "矗立在安平漁人碼頭岸邊的巨型鯨魚裝置藝術，藍天大海為背景相當壯觀，是近年來安平新興的熱門打卡地標，白天光線好時拍起來特別出片。",
     address: "台南市安平區安平漁人碼頭",
-    image: { src: "/images/大魚的祝福.jpg", alt: "安平漁人碼頭大魚的祝福鯨魚裝置藝術" },
+    placeId: "big-fish",
   },
   {
     title: "安平漁人碼頭夜景",
     desc: "入夜後碼頭的燈光陸續點亮，海面倒映著燈影，海風徐徐吹來，是結束一天行程後很適合一個人靜靜散步收尾的地方。",
     address: "台南市安平區安平漁人碼頭",
-    image: {
-      src: "/images/安平漁人碼頭夜晚點燈照片.jpg",
-      alt: "安平漁人碼頭夜晚點燈景色",
-    },
+    placeId: "fishermans-wharf",
   },
 ];
 
@@ -149,21 +149,7 @@ export default function DestinyPage() {
                 key={spot.title}
                 className="overflow-hidden rounded-2xl border border-border bg-background-elevated"
               >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <Parallax
-                    speed={0.06}
-                    range={26}
-                    className="absolute inset-x-0 -top-[13%] h-[126%]"
-                  >
-                    <Image
-                      src={spot.image.src}
-                      alt={spot.image.alt}
-                      fill
-                      sizes="(min-width: 640px) 50vw, 100vw"
-                      className="object-cover"
-                    />
-                  </Parallax>
-                </div>
+                <InstagramGrid posts={instagramPosts[spot.placeId].slice(0, 1)} name={spot.title} />
                 <div className="p-6">
                   <h3 className="font-[family-name:var(--font-serif-tc)] text-xl">
                     {spot.title}
@@ -173,6 +159,9 @@ export default function DestinyPage() {
                   </p>
                   <p className="mt-4 text-xs text-muted/70">
                     📍 {spot.address}
+                  </p>
+                  <p className="mt-4 text-xs text-muted/70">
+                    本區內容由 Instagram 公開貼文嵌入顯示，照片著作權歸原著作權人所有，本站不主張相關照片之著作權。
                   </p>
                 </div>
               </div>

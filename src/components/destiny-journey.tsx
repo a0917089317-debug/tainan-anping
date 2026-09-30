@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useRef, useState } from "react";
 import {
   RouletteWheel,
   type RouletteWheelHandle,
   type WheelSegment,
 } from "@/components/roulette-wheel";
+import { hasPlacePhoto, PlacePhoto } from "@/components/place-photo";
 import {
   setDistricts,
   setTrip,
@@ -18,7 +18,6 @@ import {
 import {
   districtsWithPlaces,
   mapsUrl,
-  photoFor,
   placeById,
   routeKm,
   routeUrl,
@@ -166,6 +165,13 @@ export function DestinyJourney() {
     const more = drawCandidates({ visited: next, moodIds, minutes, budget, districts: scope });
     if (more.length) setCandidates(more);
     else setPhase("done");
+  };
+
+  // 只重抽這一站的輪盤，已加入的站保留
+  const redrawRound = () => {
+    if (minutes === null || budget === null) return;
+    setCandidates(drawCandidates({ visited: stops, moodIds, minutes, budget, districts: scope }));
+    setLanded(null);
   };
 
   // 保持和區域清單相同的順序
@@ -455,7 +461,7 @@ export function DestinyJourney() {
   }
 
   const place = landed ? placeById(landed) : null;
-  const photo = place ? photoFor(place.id) : undefined;
+  const photo = place ? hasPlacePhoto(place.id) : false;
   const total = minutes ?? 0;
   const cap = budget ?? 0;
 
@@ -500,11 +506,7 @@ export function DestinyJourney() {
                       ⏱ {place.stay} · 💰 {costOf(place.id) ? `約 $${costOf(place.id)}` : "免費"}
                     </p>
                   </div>
-                  {photo && (
-                    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-border">
-                      <Image src={photo} alt={place.name} fill sizes="(min-width: 640px) 12rem, 100vw" className="object-cover" />
-                    </div>
-                  )}
+                  <PlacePhoto id={place.id} alt={place.name} sizes="(min-width: 640px) 12rem, 100vw" />
                 </div>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <button type="button" onClick={accept} className={btnPrimary}>
@@ -570,6 +572,13 @@ export function DestinyJourney() {
                 className={btnGhost}
               >
                 旅程就到這裡
+              </button>
+              <button
+                type="button"
+                onClick={redrawRound}
+                className={btnGhost}
+              >
+                重新排一次
               </button>
               <button type="button" onClick={() => setPhase("setup")} className={btnGhost}>
                 重新設定

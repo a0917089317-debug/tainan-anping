@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { InstagramGrid } from "@/components/instagram-grid";
+import { instagramPosts } from "@/lib/instagram";
 import {
   categories,
   districtOf,
@@ -12,86 +13,6 @@ import {
 
 export const metadata: Metadata = {
   title: "安平區 | 台南獨旅",
-};
-
-// 有 IG 貼文的地點改用 IG 照片格子，取代專案內的照片
-const instagram: Record<string, string[]> = {
-  "anping-fort": [
-    "https://www.instagram.com/p/C8RaPVqpDPJ/",
-    "https://www.instagram.com/p/DJzEZZ1T5yM/",
-    "https://www.instagram.com/p/C5R6qcgy1_4/",
-  ],
-  "eternal-castle": [
-    "https://www.instagram.com/p/Cm3RuR9yI_h/",
-    "https://www.instagram.com/p/CnyDPyUPWMF/",
-  ],
-  tait: [
-    "https://www.instagram.com/p/BCoroBzBlc4/",
-    "https://www.instagram.com/p/DWSa1ZNAKbU/",
-    "https://www.instagram.com/p/fBGub/",
-  ],
-  "tree-house": [
-    "https://www.instagram.com/p/B1WcALvnYd3/",
-    "https://www.instagram.com/p/DXLvqLAmY19/",
-    "https://www.instagram.com/p/DFfoE8avME5/",
-  ],
-  julius: [
-    "https://www.instagram.com/p/DdbRz6-DlwQ/",
-    "https://www.instagram.com/p/Dbaj3x8CGcR/",
-    "https://www.instagram.com/p/DZuYu7iFAbX/",
-  ],
-  "small-fort": ["https://www.instagram.com/p/DQ-uaSQk-Ve/"],
-  haishan: ["https://www.instagram.com/p/B5P34SAHBuJ/"],
-  tianhou: [
-    "https://www.instagram.com/p/C_m_Tv2Pgos/",
-    "https://www.instagram.com/p/CtIpLDyvo5v/",
-  ],
-  zhu: [
-    "https://www.instagram.com/p/OuwCz/",
-    "https://www.instagram.com/p/fBlws/",
-    "https://www.instagram.com/p/B3Cfqe7ghIh/",
-  ],
-  "oyster-kiln": ["https://www.instagram.com/p/DOlblemkRve/"],
-  "fishermans-wharf": [
-    "https://www.instagram.com/p/CgapC_ThGDc/",
-    "https://www.instagram.com/p/DNdcQCAT5X_/?img_index=1",
-    "https://www.instagram.com/p/DNdcQCAT5X_/?img_index=2",
-  ],
-  "big-fish": [
-    "https://www.instagram.com/p/CDYxWv4j_eZ/",
-    "https://www.instagram.com/p/C92b8EmSAYu/",
-    "https://www.instagram.com/p/CXVEnXNFJBE/",
-  ],
-  sunset: [
-    "https://www.instagram.com/p/CwCmhX9h4fB/",
-    "https://www.instagram.com/p/CFjO7-6Bjd8/",
-    "https://www.instagram.com/p/6ociSdFmJ1/",
-  ],
-  linmoniang: [
-    "https://www.instagram.com/p/DRoWhP0E8Cd/?img_index=1",
-    "https://www.instagram.com/p/CpH_4D9hscn/",
-    "https://www.instagram.com/p/DRoWhP0E8Cd/?img_index=4",
-  ],
-  canal: [
-    "https://www.instagram.com/p/DNdcQCAT5X_/?img_index=3",
-    "https://www.instagram.com/p/DNdcQCAT5X_/?img_index=4",
-    "https://www.instagram.com/p/DNdcQCAT5X_/?img_index=9",
-  ],
-  yuguang: [
-    "https://www.instagram.com/p/C7mHuIDy3MH/",
-    "https://www.instagram.com/p/DOoI08KkhPX/",
-  ],
-  "harbor-park": [
-    "https://www.instagram.com/p/DMkTgO-Pg0j/?img_index=3",
-    "https://www.instagram.com/p/DUf0N9XFPM6/?img_index=3",
-    "https://www.instagram.com/p/BtewmvWHlx2/",
-    "https://www.instagram.com/p/Bwv_37-pJ1z/",
-  ],
-  deyang: [
-    "https://www.instagram.com/p/Dd25sCGk1F2/",
-    "https://www.instagram.com/p/DcBCJioGqPG/",
-    "https://www.instagram.com/p/Da494i-oFFs/",
-  ],
 };
 
 // 卡片內的分類資訊小框（同中西區頁）
@@ -285,7 +206,7 @@ export default function AnpingPage() {
                 <div className="mt-6 grid gap-6 sm:grid-cols-2">
                   {items.map((place) => {
                     const photo = photoFor(place.id);
-                    const posts = instagram[place.id];
+                    const posts = instagramPosts[place.id];
                     return (
                       <div
                         key={place.id}

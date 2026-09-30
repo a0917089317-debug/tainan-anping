@@ -1,9 +1,4 @@
-/** 貼文網址帶 ?img_index=N 時取多圖貼文的第 N 張 */
-function imageSrc(post: string) {
-  const code = post.match(/\/p\/([^/?]+)/)?.[1];
-  const index = new URL(post).searchParams.get("img_index");
-  return `/api/instagram?code=${code}${index && index !== "1" ? `&index=${index}` : ""}`;
-}
+import { instagramImageSrc } from "@/lib/instagram";
 
 /** Instagram 貼文照片格子；圖片經 /api/instagram 向 IG 取得 */
 export function InstagramGrid({ posts, name }: { posts: string[]; name: string }) {
@@ -16,38 +11,55 @@ export function InstagramGrid({ posts, name }: { posts: string[]; name: string }
       }`}
     >
       {posts.map((post, i) => (
-        <a
+        <InstagramPhoto
           key={post}
-          href={post}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`在 Instagram 看${name}的照片`}
-          className={`group/ig relative block overflow-hidden ${
-            featureFirst && i === 0 ? "row-span-2" : ""
-          }`}
-        >
-          {/* 經 /api/instagram 轉來的 IG 圖片，不經過 next/image */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={imageSrc(post)}
-            alt={`${name}（Instagram 貼文）`}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover/ig:scale-105"
-          />
-          <svg
-            aria-hidden
-            viewBox="0 0 24 24"
-            className="absolute right-3 bottom-3 h-8 w-8 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <rect x="3" y="3" width="18" height="18" rx="5" />
-            <circle cx="12" cy="12" r="4" />
-            <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-          </svg>
-        </a>
+          post={post}
+          name={name}
+          className={featureFirst && i === 0 ? "row-span-2" : ""}
+        />
       ))}
     </div>
+  );
+}
+
+/** 單張 IG 貼文照片：點了開 IG 貼文，右下角有 IG 圖示 */
+export function InstagramPhoto({
+  post,
+  name,
+  className = "",
+}: {
+  post: string;
+  name: string;
+  className?: string;
+}) {
+  return (
+    <a
+      href={post}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`在 Instagram 看${name}的照片`}
+      className={`group/ig relative block overflow-hidden ${className}`}
+    >
+      {/* 經 /api/instagram 轉來的 IG 圖片，不經過 next/image */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={instagramImageSrc(post)}
+        alt={`${name}（Instagram 貼文）`}
+        loading="lazy"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover/ig:scale-105"
+      />
+      <svg
+        aria-hidden
+        viewBox="0 0 24 24"
+        className="absolute right-3 bottom-3 h-8 w-8 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+      </svg>
+    </a>
   );
 }

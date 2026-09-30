@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { InstagramGrid } from "@/components/instagram-grid";
+import { instagramPosts } from "@/lib/instagram";
 
 export const metadata: Metadata = {
   title: "中西區 | 台南獨旅",
@@ -27,11 +28,7 @@ const spots: ({
     tag: "歷史街區",
     name: "神農街",
     desc: "台南最老的街道之一，兩側老屋掛著燈籠與招牌，白天寧靜、入夜氛圍更迷人，很適合一個人放慢腳步拍照。",
-    instagram: [
-      "https://www.instagram.com/p/B8OHLhvgf0o/",
-      "https://www.instagram.com/p/CTD1ndBlAZX/",
-      "https://www.instagram.com/p/BHRUNubjTHz/",
-    ],
+    instagram: instagramPosts.shennong,
     hours: {
       intro:
         "台南神農街本身為開放式戶外老街，全天候 24 小時免費開放，沒有管制進出時間。不過，街區內的個別店家、咖啡廳與餐酒館則有各自的營業時間：",
@@ -55,7 +52,7 @@ const spots: ({
     tag: "百年建築",
     name: "林百貨",
     desc: "台灣第一間百貨公司，頂樓有神社遺跡與展望台，逛一層樓大約半小時，一個人也很自在。",
-    instagram: ["https://www.instagram.com/p/DR4mEjBkVUz/"],
+    instagram: instagramPosts.hayashi,
     hours: {
       intro: "台南林百貨的營業時間為每日 11:00 – 21:00（星期一至星期日無公休）。",
       items: [
@@ -68,12 +65,7 @@ const spots: ({
     tag: "文青選物",
     name: "正興街",
     desc: "咖啡館、獨立選物店與老屋改建的小店聚集地，隨興晃進一間店就是一段小旅程。",
-    instagram: [
-      "https://www.instagram.com/p/BhOzOsjFKPB/",
-      "https://www.instagram.com/p/9QA-AlNdRL/",
-      "https://www.instagram.com/p/DSpMRFdiVvS/",
-      "https://www.instagram.com/p/DSjT3NYEwnQ/",
-    ],
+    instagram: instagramPosts.zhengxing,
     sections: [
       {
         title: "🍧 經典必訪美食",
@@ -113,10 +105,7 @@ const spots: ({
     tag: "老樹院落",
     name: "孔廟文化園區",
     desc: "全台首學，老榕樹與紅牆巷弄交錯，安靜到可以一個人坐著發呆一下午。",
-    instagram: [
-      "https://www.instagram.com/p/CYgdfGMPdaT/",
-      "https://www.instagram.com/p/CB9zr91DMjS/",
-    ],
+    instagram: instagramPosts.confucius,
     sections: [
       {
         title: "🏛️ 園區亮點與特色",
@@ -139,7 +128,7 @@ const spots: ({
     tag: "國定古蹟",
     name: "赤崁樓",
     desc: "前身是荷蘭人興建的普羅民遮城，如今紅瓦飛簷的文昌閣與海神廟立在老榕樹下，入夜點燈後更有味道。",
-    instagram: ["https://www.instagram.com/p/Clc3eOApNqr/"],
+    instagram: instagramPosts.chihkan,
     sections: [
       {
         title: "🎫 參觀資訊",
@@ -161,11 +150,7 @@ const spots: ({
     tag: "小吃老街",
     name: "國華街",
     desc: "台南人從小吃到大的小吃街，永樂市場一帶割包、春捲、小卷米粉一攤接一攤，一個人也能一路吃過去，建議空著肚子來。",
-    instagram: [
-      "https://www.instagram.com/p/CvACxKsBwhI/",
-      "https://www.instagram.com/p/DNr6o965DxD/",
-      "https://www.instagram.com/p/DH2QONRJc2D/",
-    ],
+    instagram: instagramPosts.guohua,
     sections: [
       {
         title: "🎫 景點資訊（西市場）",

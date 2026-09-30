@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useRef, useState, useSyncExternalStore } from "react";
 import {
   RouletteWheel,
   type RouletteWheelHandle,
   type WheelSegment,
 } from "@/components/roulette-wheel";
+import { hasPlacePhoto, PlacePhoto } from "@/components/place-photo";
 import {
   categories,
   dishesIn,
@@ -15,7 +15,6 @@ import {
   mapsUrl,
   placeById,
   places,
-  photoFor,
   placesIn,
   recommendationsFor,
   routeKm,
@@ -577,7 +576,7 @@ function PlaceCard({
   onNext: () => void;
 }) {
   const next = placeById(place.next);
-  const photo = photoFor(place.id);
+  const photo = hasPlacePhoto(place.id);
   return (
     <div>
       <div className={photo ? "grid gap-6 sm:grid-cols-[minmax(0,1fr)_13rem]" : undefined}>
@@ -608,17 +607,7 @@ function PlaceCard({
             </div>
           </dl>
         </div>
-        {photo && (
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-border sm:mt-1">
-            <Image
-              src={photo}
-              alt={place.name}
-              fill
-              sizes="(min-width: 640px) 13rem, 100vw"
-              className="object-cover"
-            />
-          </div>
-        )}
+        <PlacePhoto id={place.id} alt={place.name} sizes="(min-width: 640px) 13rem, 100vw" className="sm:mt-1" />
       </div>
       <div className="mt-6 flex flex-wrap gap-3">{actions}</div>
       <a
