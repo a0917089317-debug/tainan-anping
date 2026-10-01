@@ -1,4 +1,4 @@
-import { districtOf, placeById, places, type Place } from "@/lib/anping-roulette";
+import { districtOf, km, placeById, places, type Place } from "@/lib/anping-roulette";
 
 export type MoodId =
   | "sea"
@@ -240,6 +240,52 @@ export function drawCandidates({
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled.slice(0, WHEEL_MAX).map((p) => p.id);
+}
+
+export type TransportId = "walk" | "youbike" | "bus" | "lrt" | "mrt" | "taxi" | "scooter";
+
+// speed：平均時速（公里）；wait：等車、借還車、找停車位的固定時間（分鐘）
+export const transports: { id: TransportId; emoji: string; label: string; speed: number; wait: number }[] = [
+  { id: "walk", emoji: "🚶", label: "徒步", speed: 4.5, wait: 0 },
+  { id: "youbike", emoji: "🚲", label: "YouBike", speed: 12, wait: 5 },
+  { id: "bus", emoji: "🚌", label: "公車", speed: 15, wait: 12 },
+  { id: "lrt", emoji: "🚊", label: "輕軌", speed: 20, wait: 10 },
+  { id: "mrt", emoji: "🚇", label: "捷運", speed: 30, wait: 10 },
+  { id: "taxi", emoji: "🚕", label: "Uber計程車", speed: 25, wait: 5 },
+  { id: "scooter", emoji: "🛵", label: "機車", speed: 25, wait: 5 },
+];
+
+export const transportById = (id: TransportId) => transports.find((t) => t.id === id)!;
+
+// 直線距離換算成實際路程的係數
+const ROAD_FACTOR = 1.3;
+
+/** 兩站之間的移動時間（分鐘），進位到 5 分鐘、至少 5 分鐘 */
+export function legMinutes(from: string, to: string, mode: TransportId) {
+  const { speed, wait } = transportById(mode);
+  const raw = (km(from, to) * ROAD_FACTOR * 60) / speed + wait;
+  return Math.max(5, Math.ceil(raw / 5) * 5);
+}
+
+// 開始時間下拉選單：06:00～22:00，每 30 分鐘一格（以當天分鐘數表示）
+export const startTimeOptions = Array.from({ length: 33 }, (_, i) => 360 + i * 30);
+export const DEFAULT_START = 540;
+
+export const clockOf = (total: number) => {
+  const m = ((total % 1440) + 1440) % 1440;
+  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+};
+
+/** 依開始時間與交通方式排出每站的抵達、離開時間 */
+export function schedule(ids: string[], start: number, mode: TransportId) {
+  let clock = start;
+  return ids.map((id, i) => {
+    const leg = i === 0 ? 0 : legMinutes(ids[i - 1], id, mode);
+    const arrive = clock + leg;
+    const stay = minutesOf(placeById(id));
+    clock = arrive + stay;
+    return { id, leg, arrive, stay, leave: clock };
+  });
 }
 
 export function formatMinutes(total: number) {

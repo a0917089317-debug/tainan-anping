@@ -8,6 +8,7 @@ import {
 } from "@/components/roulette-wheel";
 import { hasPlacePhoto, PlacePhoto } from "@/components/place-photo";
 import {
+  ScheduleControls,
   setDistricts,
   setTrip,
   TripPanel,
@@ -26,7 +27,9 @@ import {
 import {
   budgetLabel,
   budgetOptions,
+  clockOf,
   costOf,
+  DEFAULT_START,
   districtById,
   districts,
   drawCandidates,
@@ -36,13 +39,16 @@ import {
   MAX_MOODS,
   minutesOf,
   moods,
+  schedule,
   stopEmoji,
   timeLabel,
   timeOptions,
+  transportById,
   TRAVEL_MIN,
   whisperOf,
   type DistrictId,
   type MoodId,
+  type TransportId,
 } from "@/lib/destiny-journey";
 
 const btnPrimary =
@@ -88,6 +94,8 @@ export function DestinyJourney() {
   const [candidates, setCandidates] = useState<string[]>([]);
   const [landed, setLanded] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [startAt, setStartAt] = useState(DEFAULT_START);
+  const [transport, setTransport] = useState<TransportId>("walk");
   // 最近一次「截取最短路線」省下的距離，路線變動後就不再顯示
   const [sorted, setSorted] = useState<{ key: string; savedKm: number } | null>(null);
   const { origin, toggleOrigin, locating, locError } = useMyLocation();
@@ -373,22 +381,41 @@ export function DestinyJourney() {
   const spent = journeyCost(stops);
 
   if (phase === "done") {
+    const plan = schedule(stops, startAt, transport);
+    const mode = transportById(transport);
+    const endAt = plan.length ? plan[plan.length - 1].leave : startAt;
     return (
       <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-background-elevated p-6 text-center sm:p-10">
+        <div className="mb-8">
+          <ScheduleControls
+            startAt={startAt}
+            onStartAt={setStartAt}
+            transport={transport}
+            onTransport={setTransport}
+          />
+        </div>
+
         <ol className="flex flex-col items-center gap-2">
           <FlowItem first>🎰 命運輪盤</FlowItem>
           <FlowItem>今天想怎麼玩？</FlowItem>
           <FlowItem>{summary}</FlowItem>
-          {stops.map((id, i) => {
+          {plan.map(({ id, leg, arrive, stay, leave }, i) => {
             const p = placeById(id);
             return (
-              <FlowItem key={id}>
+              <FlowItem
+                key={id}
+                leg={i > 0 ? `${mode.emoji} ${mode.label}約 ${formatMinutes(leg)}` : undefined}
+              >
                 <span className="block text-xs tracking-[0.2em] text-muted">
                   {i === 0 ? "🎯" : stopEmoji(p)} 第{ordinal(i)}站
                 </span>
                 <span className="font-[family-name:var(--font-serif-tc)] text-xl text-foreground">
                   {p.name}
                 </span>
+                <span className="mt-1 block text-sm text-accent">
+                  {clockOf(arrive)} – {clockOf(leave)}
+                </span>
+                <span className="block text-xs text-muted">建議停留 {formatMinutes(stay)}</span>
               </FlowItem>
             );
           })}
@@ -400,7 +427,7 @@ export function DestinyJourney() {
         </ol>
 
         <p className="mt-6 text-sm text-muted">
-          共 {stops.length} 站 · 約 {formatMinutes(usedMin)}（含移動）· 約 ${spent.toLocaleString()}
+          共 {stops.length} 站 · {clockOf(startAt)} – {clockOf(endAt)} · 約 {formatMinutes(endAt - startAt)}（含移動）· 約 ${spent.toLocaleString()}
           {stops.length > 1 && <> · 直線約 {routeKm(stops).toFixed(1)} 公里</>}
         </p>
         {origin && <p className="mt-2 text-sm text-accent">📍 路線會從你目前的位置出發</p>}
@@ -613,12 +640,22 @@ function Step({
   );
 }
 
-function FlowItem({ first, children }: { first?: boolean; children: React.ReactNode }) {
+function FlowItem({
+  first,
+  leg,
+  children,
+}: {
+  first?: boolean;
+  /** 箭頭旁顯示的移動方式與時間 */
+  leg?: string;
+  children: React.ReactNode;
+}) {
   return (
     <li className="flex flex-col items-center gap-2">
       {!first && (
-        <span aria-hidden className="text-muted">
-          ↓
+        <span className="text-muted">
+          <span aria-hidden>↓</span>
+          {leg && <span className="ml-2 text-xs">{leg}</span>}
         </span>
       )}
       <div>{children}</div>

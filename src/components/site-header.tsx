@@ -22,7 +22,7 @@ export function SiteHeader() {
           href="/"
           className="font-[family-name:var(--font-serif-tc)] text-lg tracking-wide text-accent"
         >
-          台南獨旅
+          下一站，隨機
         </Link>
 
         <nav className="hidden gap-8 text-sm text-muted sm:flex">

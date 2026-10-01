@@ -24,6 +24,8 @@ export const cityDistricts: Record<string, District[]> = {
         "牛園火鍋 安平店",
       ],
       notes: {
+        周氏蝦捲:
+          "（由於地圖搜尋不到確切位置 如需要google map的藍色路線功能 請勿選取）",
         同記安平豆花:
           "（由於地圖搜尋不到確切位置 如需要google map的藍色路線功能 請勿選取）",
       },

@@ -6,13 +6,14 @@ import { InstagramPhoto } from "@/components/instagram-grid";
 import { instagramPosts } from "@/lib/instagram";
 
 // places：標題裡要連到 Google 地圖的地名（以「．」分隔顯示）
-// images：placeId 有 IG 貼文時改用第一則貼文（src/lib/instagram.ts），否則用 src 專案內照片
+// images：有 post 時用該則 IG 貼文；placeId 有 IG 貼文時改用第一則貼文（src/lib/instagram.ts），否則用 src 專案內照片
 const spots: {
   tag: string;
   title: string;
   desc: string;
-  images?: { src: string; placeId?: string }[];
+  images?: { src: string; placeId?: string; post?: string }[];
   places?: string[];
+  info?: { label: string; text: string }[];
   note?: string;
 }[] = [
   {
@@ -44,15 +45,36 @@ const spots: {
     tag: "文青選物",
     title: "正興街周邊",
     desc: "咖啡館、獨立選物店與老屋改建的小店聚集地，隨興晃進一間店就是一段小旅程。",
-    images: [{ src: "/images/正興街.png", placeId: "zhengxing" }],
+    images: [
+      {
+        src: "/images/正興街.png",
+        placeId: "zhengxing",
+        post: "https://www.instagram.com/p/C81zD3HSLwy/?img_index=1",
+      },
+      {
+        src: "/images/正興街.png",
+        placeId: "zhengxing",
+        post: "https://www.instagram.com/p/DcfXSFaRAqd/",
+      },
+    ],
     places: ["正興街"],
   },
   {
     tag: "夜間散步",
     title: "藍晒圖文創園區",
     desc: "白天是文創商場，晚上的燈光裝置與草地氛圍很放鬆，適合吃完晚餐後散步收尾。",
-    images: [{ src: "/images/藍晒圖.png" }],
+    images: [
+      {
+        src: "/images/藍晒圖.png",
+        post: "https://www.instagram.com/p/DRn-7baEvPU/?img_index=1",
+      },
+    ],
     places: ["藍晒圖文創園區"],
+    info: [
+      { label: "地址", text: "臺南市南區西門路一段689巷" },
+      { label: "營業時間", text: "14:00 – 21:00（週二園休）" },
+      { label: "電話", text: "06-2227195" },
+    ],
   },
   {
     tag: "老樹院落",
@@ -102,16 +124,13 @@ export default function Home() {
           <div className="relative mx-auto max-w-3xl text-center">
             <HeroGreeting />
             <p className="mb-4 text-sm tracking-[0.3em] text-muted">
-              TAINAN · SOLO TRAVEL
+              RANDOM · JOURNEY
             </p>
             <h1 className="font-[family-name:var(--font-serif-tc)] text-4xl leading-tight text-foreground sm:text-5xl">
-              一個人的台南，
-              <br />
-              也能走得很自在
+              讓今天，隨機發生
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-muted">
-              老街巷弄、在地小吃、安靜的老屋咖啡館——台南的步調很適合一個人旅行。
-              這裡整理了獨旅台南最值得走一趟的景點、美食與行程安排。
+              放下計畫，跟著一點未知，去看看今天的台南。
             </p>
             <a
               href="#spots"
@@ -152,11 +171,11 @@ export default function Home() {
                         spot.images.length > 1 ? "grid-cols-2" : ""
                       }`}
                     >
-                      {spot.images.map(({ src, placeId }, i) => {
+                      {spot.images.map(({ src, placeId, post: override }, i) => {
                         const alt = spot.places?.[i] ?? spot.title;
-                        const post = placeId && instagramPosts[placeId]?.[0];
+                        const post = override ?? (placeId && instagramPosts[placeId]?.[0]);
                         return post ? (
-                          <InstagramPhoto key={src} post={post} name={alt} className="rounded-xl" />
+                          <InstagramPhoto key={post} post={post} name={alt} className="rounded-xl" />
                         ) : (
                           <div key={src} className="relative overflow-hidden rounded-xl">
                             <Image
@@ -195,7 +214,19 @@ export default function Home() {
                     )}
                   </h3>
                   <p className="mt-3 text-sm leading-7 text-muted">{spot.desc}</p>
-                  {spot.images?.some(({ placeId }) => placeId && instagramPosts[placeId]) && (
+                  {spot.info && (
+                    <dl className="mt-4 space-y-1 text-xs leading-6 text-muted">
+                      {spot.info.map(({ label, text }) => (
+                        <div key={label} className="flex gap-2">
+                          <dt className="shrink-0 text-accent">{label}</dt>
+                          <dd>{text}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                  {spot.images?.some(
+                    ({ placeId, post }) => post || (placeId && instagramPosts[placeId]),
+                  ) && (
                     <p className="mt-4 text-xs text-muted/70">
                       本區內容由 Instagram 公開貼文嵌入顯示，照片著作權歸原著作權人所有，本站不主張相關照片之著作權。
                     </p>

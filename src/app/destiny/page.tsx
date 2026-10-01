@@ -93,7 +93,7 @@ export default function DestinyPage() {
               ROULETTE
             </p>
             <h1 className="font-[family-name:var(--font-serif-tc)] text-4xl leading-tight text-foreground sm:text-5xl">
-              命運輪盤
+              轉哪，玩哪。
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-foreground sm:text-xl">
               🎡 輕鬆旅行，讓命運替你選一站。
@@ -115,7 +115,7 @@ export default function DestinyPage() {
                 不設條件，從類型一路轉到店家，轉到喜歡的就加入今天行程。
               </p>
               <p className="mx-auto mt-6 max-w-xl rounded-xl border-2 border-amber-400 bg-amber-400/15 px-5 py-4 text-lg font-bold leading-8 text-amber-300 sm:text-xl">
-                ⚠️ 安平豆花無法搜尋確切位置，如行程中有安平豆花，無法形成 Google Map 藍線
+                ⚠️ <span className="text-red-500">安平豆花</span>、<span className="text-red-500">周氏蝦捲</span>無法搜尋確切位置，如行程中有這兩家店，無法形成 Google Map 藍線
               </p>
             </div>
             <AnpingRoulette />

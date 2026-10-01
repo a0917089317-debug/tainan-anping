@@ -601,7 +601,7 @@ const coords: Record<string, [number, number]> = {
 };
 
 /** 兩地直線距離（公里） */
-function km(a: string, b: string) {
+export function km(a: string, b: string) {
   const [lat1, lng1] = coords[a];
   const [lat2, lng2] = coords[b];
   const rad = Math.PI / 180;

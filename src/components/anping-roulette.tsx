@@ -24,10 +24,18 @@ import {
   type Place,
 } from "@/lib/anping-roulette";
 import {
+  clockOf,
   DEFAULT_DISTRICTS,
+  DEFAULT_START,
   districtById,
   districts,
+  formatMinutes,
+  schedule,
+  startTimeOptions,
+  transportById,
+  transports,
   type DistrictId,
+  type TransportId,
 } from "@/lib/destiny-journey";
 
 // 今天行程存在 localStorage，重新整理頁面也不會消失
@@ -444,8 +452,62 @@ export function useMyLocation() {
   return { origin, clearOrigin: () => setOrigin(null), toggleOrigin, locating, locError };
 }
 
+/** 開始時間下拉選單＋交通方式按鈕，命運旅程結果與今天行程共用 */
+export function ScheduleControls({
+  startAt,
+  onStartAt,
+  transport,
+  onTransport,
+}: {
+  startAt: number;
+  onStartAt: (minutes: number) => void;
+  transport: TransportId;
+  onTransport: (id: TransportId) => void;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <label className="flex items-center gap-2 text-sm text-muted">
+        🕘 開始時間
+        <select
+          value={startAt}
+          onChange={(e) => onStartAt(Number(e.target.value))}
+          className="rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-accent focus:outline-none"
+        >
+          {startTimeOptions.map((t) => (
+            <option key={t} value={t}>
+              {clockOf(t)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="flex flex-wrap justify-center gap-2" role="group" aria-label="交通方式">
+        {transports.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            aria-pressed={transport === t.id}
+            onClick={() => onTransport(t.id)}
+            className={`rounded-full border px-4 py-2 text-sm transition ${
+              transport === t.id
+                ? "border-accent bg-accent/15 text-accent"
+                : "border-border text-foreground hover:border-accent/60"
+            }`}
+          >
+            {t.emoji} {t.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function TripPanel() {
   const trip = useTrip();
+  const [startAt, setStartAt] = useState(DEFAULT_START);
+  const [transport, setTransport] = useState<TransportId>("walk");
+  const plan = schedule(trip, startAt, transport);
+  const mode = transportById(transport);
+  const endAt = plan.length ? plan[plan.length - 1].leave : startAt;
   // 最近一次「排出最短路線」省下的距離，行程變動後就不再顯示
   const [sorted, setSorted] = useState<{ key: string; savedKm: number } | null>(null);
   const { origin, clearOrigin, toggleOrigin, locating, locError } = useMyLocation();
@@ -495,9 +557,10 @@ export function TripPanel() {
         )}
       </div>
 
-      {trip.length > 1 && (
+      {trip.length > 0 && (
         <p className="mt-3 text-sm text-muted">
-          全程直線距離約 {tripKm.toFixed(1)} 公里
+          {clockOf(startAt)} – {clockOf(endAt)} · 約 {formatMinutes(endAt - startAt)}（含移動）
+          {trip.length > 1 && <> · 全程直線距離約 {tripKm.toFixed(1)} 公里</>}
           {justSorted && justSorted.savedKm > 0.05 && (
             <span className="ml-2 text-accent">
               已重新排序，少走約 {justSorted.savedKm.toFixed(1)} 公里
@@ -511,46 +574,67 @@ export function TripPanel() {
       {trip.length === 0 ? (
         <p className="mt-4 text-muted">還沒有行程，轉到喜歡的地方就按「加入今天行程」。</p>
       ) : (
-        <ol className="mt-6 grid gap-3 sm:grid-cols-2">
-          {origin && (
-            <li className="flex items-center gap-3 rounded-lg border border-accent px-3 py-2">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-background">
-                起
-              </span>
-              <span className="flex-1 text-foreground">📍 我的位置</span>
-              <button
-                type="button"
-                onClick={clearOrigin}
-                aria-label="取消從我的位置出發"
-                className="text-muted hover:text-accent"
-              >
-                ✕
-              </button>
-            </li>
-          )}
-          {trip.map((id, i) => {
-            const p = placeById(id);
-            return (
-              <li key={id} className="flex items-center gap-3 rounded-lg border border-border px-3 py-2">
+        <>
+          <div className="mt-6">
+            <ScheduleControls
+              startAt={startAt}
+              onStartAt={setStartAt}
+              transport={transport}
+              onTransport={setTransport}
+            />
+          </div>
+          <ol className="mx-auto mt-6 flex max-w-xl flex-col gap-2">
+            {origin && (
+              <li className="flex items-center gap-3 rounded-lg border border-accent px-3 py-2">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-background">
-                  {i + 1}
+                  起
                 </span>
-                <span className="flex-1 text-foreground">
-                  {p.emoji} {p.name}
-                  <span className="ml-2 text-xs text-muted">{p.stay}</span>
-                </span>
+                <span className="flex-1 text-foreground">📍 我的位置</span>
                 <button
                   type="button"
-                  onClick={() => setTrip((t) => t.filter((x) => x !== id))}
-                  aria-label={`從行程移除 ${p.name}`}
+                  onClick={clearOrigin}
+                  aria-label="取消從我的位置出發"
                   className="text-muted hover:text-accent"
                 >
                   ✕
                 </button>
               </li>
-            );
-          })}
-        </ol>
+            )}
+            {plan.map(({ id, leg, arrive, stay, leave }, i) => {
+              const p = placeById(id);
+              return (
+                <li key={id} className="flex flex-col gap-2">
+                  {i > 0 && (
+                    <p className="text-center text-xs text-muted">
+                      <span aria-hidden className="mr-2 text-sm">↓</span>
+                      {mode.emoji} {mode.label}約 {formatMinutes(leg)}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-3 rounded-lg border border-border px-3 py-2">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-background">
+                      {i + 1}
+                    </span>
+                    <span className="flex-1 text-foreground">
+                      {p.emoji} {p.name}
+                      <span className="block text-sm text-accent">
+                        {clockOf(arrive)} – {clockOf(leave)}
+                        <span className="ml-2 text-xs text-muted">建議停留 {formatMinutes(stay)}</span>
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setTrip((t) => t.filter((x) => x !== id))}
+                      aria-label={`從行程移除 ${p.name}`}
+                      className="text-muted hover:text-accent"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </>
       )}
     </section>
   );
